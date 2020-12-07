@@ -23,23 +23,21 @@ class Hero:
     def movement(self):
         state = pygame.key.get_pressed()
 
-        # Перемещение
-        if state[pygame.K_LEFT] and self.x > self.vel:
-            self.x -= self.vel
-        elif state[pygame.K_RIGHT] and self.x < width - self.vel - self.width:
-            self.x += self.vel
+        if self.x > 0:
+            # Перемещение
+            if state[pygame.K_LEFT]:
+                self.x -= self.vel
+            # с ускорением
+            if state[pygame.K_LSHIFT] and state[pygame.K_LEFT]:
+                self.x -= self.vel * self.acceleration
 
-        # Прыжок
-        # if not(self.isJump): # Checks is user is not jumping
-        #     if state[pygame.K_UP] and self.y > self.vel:  # Same principles apply for the y coordinate
-        #         self.y -= self.vel
-
-        #     if state[pygame.K_DOWN] and self.y < height - self.height - self.vel:
-        #         self.y += self.vel
-
-        #     if state[pygame.K_SPACE]:
-        #         self.isJump = True
-
+        if self.x < width - self.vel - self.width:
+            # в обратную сторону
+            if state[pygame.K_RIGHT]:
+                self.x += self.vel
+            # с ускорением
+            if state[pygame.K_LSHIFT] and state[pygame.K_RIGHT]:
+                self.x += self.vel * self.acceleration
 
 clock = pygame.time.Clock()
 fps = 60
