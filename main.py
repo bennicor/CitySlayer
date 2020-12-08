@@ -16,7 +16,7 @@ class Hero:
         self.y = HEIGHT - self.height
         self.isJump = False # Проверка на прыжок
         self.jumpCount = 10 # Параметр квадратичной функции для расчета траектории прыжка
-        self.acceleration = 1.5 # Коэффициент ускорения при беге
+        self.acceleration = 1.8 # Коэффициент ускорения при беге
     
     def draw(self):
         pygame.draw.rect(screen, pygame.Color("green"), (
@@ -26,6 +26,7 @@ class Hero:
     def movement(self):
         state = pygame.key.get_pressed()
 
+        # Перемещение влево
         if self.x > 0:
             if state[pygame.K_LEFT]:
                 self.x -= self.vel
@@ -33,12 +34,25 @@ class Hero:
             if state[pygame.K_LSHIFT] and state[pygame.K_LEFT]:
                 self.x -= self.vel * self.acceleration
 
+        # Перемещение вправо
         if self.x < WIDTH - self.width:
             if state[pygame.K_RIGHT]:
                 self.x += self.vel
 
             if state[pygame.K_LSHIFT] and state[pygame.K_RIGHT]:
                 self.x += self.vel * self.acceleration
+
+        # Прыжок
+        if not(self.isJump): 
+            if state[pygame.K_SPACE]:
+                self.isJump = True
+        else:
+            if self.jumpCount >= -10:
+                self.y -= (self.jumpCount * abs(self.jumpCount)) * 0.25
+                self.jumpCount -= 1
+            else: 
+                self.jumpCount = 10
+                self.isJump = False
 
 
 clock = pygame.time.Clock()
