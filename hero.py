@@ -2,7 +2,7 @@ import pygame
 
 WIDTH, HEIGHT = 1280, 720
 HERO_SPEED = 8
-GRAVITY = 2.5
+GRAVITY = 1.5
 
 
 # Класс персонажа
@@ -19,9 +19,13 @@ class Hero(pygame.sprite.Sprite):
         self.image.fill(pygame.Color("green"))
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
 
-        self.jumpCount = 30 # Параметр квадратичной функции для расчета траектории прыжка
+        self.jumpCount = 20 # Параметр квадратичной функции для расчета траектории прыжка
         self.onGround = False
-        self.left = self.right = self.up = False
+        self.left = self.right = False
+        
+        # Инициализация рывка
+        self.temp_dir = ""
+        self.dash_speed = 15
 
     def update(self, platforms):
         # Перемещение по горизонтали
@@ -33,16 +37,11 @@ class Hero(pygame.sprite.Sprite):
         if not(self.right or self.left):
             self.xvel = 0
 
-        # Прыжок
-        if self.up:
-            if self.onGround:
-                self.yvel = -self.jumpCount
-                self.onGround = False
-
         self.gravitation(platforms)
 
     def collide(self, xvel, yvel, platforms):
         hits = pygame.sprite.spritecollide(self, platforms, False)
+        self.onGround = False
         if hits: # если есть пересечение платформы с игроком
             if yvel > 0:
                 self.rect.bottom = hits[0].rect.top
@@ -63,7 +62,7 @@ class Hero(pygame.sprite.Sprite):
 
     def gravitation(self, platforms):
         # Реализация силы притяжения
-        if self.yvel <= 12.5:  
+        if self.yvel <= 12.5:
             self.yvel += GRAVITY
         
         self.rect.x += self.xvel
@@ -71,4 +70,14 @@ class Hero(pygame.sprite.Sprite):
 
         self.rect.y += self.yvel
         self.collide(0, self.yvel, platforms)
-        print(self.yvel)
+
+    def jump(self):
+        if self.onGround:
+            self.yvel = -self.jumpCount
+            self.onGround = False
+
+    def dash(self):
+        if self.temp_dir == "left":
+            self.dash_speed = -self.dash_speed
+
+        self.rect.x += self.dash_speed

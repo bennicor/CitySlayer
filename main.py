@@ -45,11 +45,12 @@ def render(level):
 
 all_sprites = pygame.sprite.Group()
 platforms = [] # объекты, с которыми будет происходить взаимодействие
-hero = Hero(150, 40, all_sprites)
+hero = Hero(300, 40, all_sprites)
 render(level)
 
 clock = pygame.time.Clock()
 fps = 60
+dash = False
 running = True
 
 while running:
@@ -59,24 +60,43 @@ while running:
             running = False
 
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_LEFT:
+            if event.key == pygame.K_LEFT and not dash:
                 hero.left = True
-            elif event.key == pygame.K_RIGHT:
+                hero.temp_dir = "left"
+            elif event.key == pygame.K_RIGHT and not dash:
                 hero.right = True
+                hero.temp_dir = "right"
             elif event.key == pygame.K_SPACE:
-                hero.up = True
+                hero.jump()
+            elif event.key == pygame.K_LSHIFT and hero.temp_dir:
+                dash = True
+                timer = .2
 
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT:
                 hero.left = False
             elif event.key == pygame.K_RIGHT:
                 hero.right = False
-            elif event.key == pygame.K_SPACE:
-                hero.up = False
+
+    # Засекается таймер, определяющий длительность рывка
+    if dash:
+        timer -= dt
+
+        if timer > 0:
+            hero.dash_speed = 15
+            hero.dash()
+        else:
+            dash = False
 
     all_sprites.draw(screen)
-    hero.update(platforms)
 
-    clock.tick(fps)
+    # Во время рывка все остальные процессы останавливаются
+    if not dash:
+        hero.update(platforms)
+    else:
+        hero.yvel = 0
+        hero.collide(hero.dash_speed, 0, platforms)
+
+    dt = clock.tick(fps) / 1000
     pygame.display.flip()
 pygame.quit()
