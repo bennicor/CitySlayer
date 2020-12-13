@@ -45,7 +45,7 @@ def render(level):
 
 all_sprites = pygame.sprite.Group()
 platforms = [] # объекты, с которыми будет происходить взаимодействие
-hero = Hero((120, 100), all_sprites)
+hero = Hero((500, 100), all_sprites)
 render(level)
 
 clock = pygame.time.Clock()
