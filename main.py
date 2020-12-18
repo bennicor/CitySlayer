@@ -1,5 +1,5 @@
 import pygame
-from platforms import Platform
+from platforms import Platform, WallPlatform
 from hero import Hero
 
 
@@ -7,26 +7,26 @@ pygame.init()
 size = WIDTH, HEIGHT = 1280, 720
 screen = pygame.display.set_mode(size)
 level = [
-       "-------------------------",
-       "-                       -",
-       "-                       -",
-       "-                       -",
-       "-                       -",
-       "-            --         -",
-       "--                      -",
-       "-                       -",
-       "-                   --- -",
-       "-      ---              -",
-       "-                       -",
-       "-                       -",
-       "-                       -",
-       "-   -----------        --",
-       "-                       -",
-       "-                -      -",
-       "-                   --  -",
-       "-                       -",
-       "-                       -",
-       "-------------------------"]
+       "#########################",
+       "#    #        #         #",
+       "#    #        #         #",
+       "#    #        #         #",
+       "#    #        #         #",
+       "#    #        #         #",
+       "#    #        #         #",
+       "#    #        #         #",
+       "#    #        #         #",
+       "#    #        #         #",
+       "#    #        #         #",
+       "#    #        #         #",
+       "#    #      #           #",
+       "#    #      #           #",
+       "#    #      #           #",
+       "#    #      #           #",
+       "#    #      #           #",
+       "#                       #",
+       "#                       #",
+       "#########################"]
 
 
 # Выводим на экран все платформы на уровне
@@ -38,7 +38,10 @@ def render(level):
             if col == "-":
                 pf = Platform(x,y, all_sprites)
                 platforms.append(pf)
-                    
+            elif col == "#":
+                pf = WallPlatform(x, y, all_sprites)
+                platforms.append(pf)
+
             x += pf.width
         y += pf.height
         x = 0
