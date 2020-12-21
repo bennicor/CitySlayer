@@ -1,5 +1,5 @@
 import pygame
-from platforms import Platform, WallPlatform
+from platforms import Fllower_Platform, WallPlatform
 from hero import Hero
 
 
@@ -7,26 +7,26 @@ pygame.init()
 size = WIDTH, HEIGHT = 1280, 720
 screen = pygame.display.set_mode(size)
 level = [
-       "#########################",
-       "#    #        #         #",
-       "#    #        #         #",
-       "#    #        #         #",
-       "#    #        #         #",
-       "#    #        #         #",
-       "#    #        #         #",
-       "#    #        #         #",
-       "#    #        #         #",
-       "#    #        #         #",
-       "#    #        #         #",
-       "#    #        #         #",
-       "#    #      #           #",
-       "#    #      #           #",
-       "#    #      #           #",
-       "#    #      #           #",
-       "#    #      #           #",
-       "#                       #",
-       "#                       #",
-       "#########################"]
+       "##############################",
+       "#    #        #              #",
+       "#    #        #              #",
+       "#    #        #              #",
+       "#    #        #              #",
+       "#    #        #              #",
+       "#    #        #              #",
+       "#    #        #              #",
+       "#    #        #              #",
+       "#    #        #              #",
+       "#    #        #              #",
+       "#    #        #              #",
+       "#    #      #                #",
+       "#    #      #                #",
+       "#    #      #                #",
+       "#    #      #                #",
+       "#    #      #                #",
+       "#                            #",
+       "#                            #",
+       "______________________________"]
 
 
 # Выводим на экран все платформы на уровне
@@ -35,8 +35,8 @@ def render(level):
 
     for row in level:
         for col in row:
-            if col == "-":
-                pf = Platform(x,y, all_sprites)
+            if col == "_":
+                pf = Fllower_Platform(x, y, all_sprites)
                 platforms.append(pf)
             elif col == "#":
                 pf = WallPlatform(x, y, all_sprites)
@@ -52,7 +52,7 @@ hero = Hero((500, 100), all_sprites)
 render(level)
 
 clock = pygame.time.Clock()
-fps = 60
+fps = 65
 dt = 0
 running = True
 

@@ -3,7 +3,7 @@ from pygame.math import Vector2
 from playerStates import IdleState
 
 WIDTH, HEIGHT = 1280, 720
-GRAVITY = 1.5
+GRAVITY = 1.45
 
 # Класс персонажа
 class Hero(pygame.sprite.Sprite):
