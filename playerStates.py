@@ -56,9 +56,24 @@ class JumpState:
         if player.onGround:
             player.vel.y = -self.velocity_y
             player.onGround = False
+            player.double_jump = True
 
         player.gravitation()
         player.collide(0, player.vel.y, platforms)
+        player.state = self.next_state
+
+
+class DoubleJumpState(JumpState):
+    def __init__(self, velocity_y, next_state):
+        super().__init__(velocity_y, next_state)
+
+    def update(self, player, dt, platforms):
+        player.vel.y = -self.velocity_y
+
+        player.gravitation()
+        player.collide(0, player.vel.y, platforms)
+
+        player.double_jump = False
         player.state = self.next_state
 
 
@@ -83,8 +98,11 @@ class MoveState:
                 player.dash_dir = "right"
                 self.velocity_x = HERO_SPEED
             elif event.key == pygame.K_SPACE:
+                if player.double_jump:
+                    return DoubleJumpState(JUMP_FORCE, player.state)
+
                 return JumpState(JUMP_FORCE, player.state)
-        
+
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT and self.velocity_x < 0:
                 return IdleState()
@@ -123,6 +141,9 @@ class IdleState:
             elif event.key == pygame.K_LSHIFT and player.dash_dir:
                 return DashState(DASH_SPEED, player.state)
             elif event.key == pygame.K_SPACE:
+                if player.double_jump:
+                    return DoubleJumpState(JUMP_FORCE, player.state)
+
                 return JumpState(JUMP_FORCE, player.state)
 
     def update(self, player, dt, platforms):

@@ -26,6 +26,8 @@ class Hero(pygame.sprite.Sprite):
         self.dash_cd = .25
         self.dash_done = False
 
+        self.double_jump = False
+
         self.state = IdleState()
 
         self.image = pygame.Surface((self.width, self.height))
@@ -85,10 +87,10 @@ class Hero(pygame.sprite.Sprite):
 
                 self.rect.left = hits[0].rect.right
 
-
             if yvel > 0:
                 self.rect.bottom = hits[0].rect.top
                 self.onGround = True
+                self.double_jump = False
                 self.wall_jump_done = False
                 self.vel.y = 0
             
