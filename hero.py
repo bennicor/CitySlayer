@@ -1,6 +1,7 @@
 import pygame
 from pygame.math import Vector2
 from playerStates import IdleState
+from platforms import *
 
 WIDTH, HEIGHT = 1280, 720
 GRAVITY = 1.45
@@ -51,6 +52,10 @@ class Hero(pygame.sprite.Sprite):
         self.onGround = False
         
         if hits: # если есть пересечение платформы с игроком
+            # Если есть пересечение с двигающейся платформой, персонаж двигается вместе с ней
+            if isinstance(hits[0], MovingPlatform):
+                self.rect.x += hits[0].x
+
             if xvel > 0:
                 if not self.onGround and hits[0].can_wall_jump:
                     self.onWall = True

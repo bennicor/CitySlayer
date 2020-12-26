@@ -58,24 +58,15 @@ class MovingPlatform(FloorPlatform):
         self.dir = dir
         self.counter = 0
         self.x = 2 if self.dir == ">" else -2
-        self.y = 3 if self.dir == "^" else 0
 
         self.image = pygame.Surface((self.width, self.height))
         self.image.fill(self.color)
         self.rect = pygame.Rect(x, y, self.width, self.height)
 
-    # Перемещение платформы на промежутке
+    # Перемещение платформы на заданном промежутке
     def update(self):
-        if self.dir == "^":
-            if abs(self.counter) >= 100:
-                self.y = -self.y
+        if abs(self.counter) >= 200:
+            self.x = -self.x
 
-            self.rect = self.rect.move(0, self.y)
-            self.counter += self.y
-        else:
-            
-            if abs(self.counter) >= 200:
-                self.x = -self.x
-
-            self.rect = self.rect.move(self.x, 0)
-            self.counter += self.x
+        self.rect = self.rect.move(self.x, 0)
+        self.counter += self.x

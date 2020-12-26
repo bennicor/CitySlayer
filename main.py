@@ -15,7 +15,7 @@ level = [
        "#                         #",
        "#       <<<<<             #",
        "#                         #",
-       "#                     ^^^ #",
+       "#                         #",
        "#                         #",
        "#        >>>              #",
        "#                         #",
@@ -41,9 +41,6 @@ def render(level):
                 platforms.append(pf)
             elif col == "<":
                 pf = MovingPlatform(x, y, platform_sprites, "<")
-                platforms.append(pf)
-            elif col == "^":
-                pf = MovingPlatform(x, y, platform_sprites, "^")
                 platforms.append(pf)
 
             x += pf.width
