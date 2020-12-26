@@ -5,6 +5,7 @@ from playerStates import IdleState
 WIDTH, HEIGHT = 1280, 720
 GRAVITY = 1.45
 
+
 # Класс персонажа
 class Hero(pygame.sprite.Sprite):
     def __init__(self, pos, *group):
@@ -17,13 +18,10 @@ class Hero(pygame.sprite.Sprite):
         self.gravity = GRAVITY
 
         self.onWall = False
-        self.onWall_timer = 1.2
-        self.wall_jump_done = False
         self.wall_pos = ""
-        self.wall_start = False
 
-        self.dash_dir = ""
-        self.dash_cd = .25
+        self.last_dir = ""
+        self.dash_cd = .3
         self.dash_done = False
 
         self.double_jump = False
@@ -38,29 +36,9 @@ class Hero(pygame.sprite.Sprite):
         self.dash_cd -= dt
 
         if self.dash_cd <= 0 and self.onGround:
-            self.dash_cd = 0
+            self.dash_cd = .3
             self.dash_done = False
                 
-    def onWall_cd(self, dt):
-        self.onWall_timer -= dt # Таймер, определяющий время виса на стене
-
-        if not self.wall_start:
-            # Ограничение входной скорости
-            self.vel.y = 0
-            self.wall_start = True
-            self.gravity = .05 # Уменьшаем гравитацию
-
-        # По истечении времени возвращаем гравитацию и ждем окончательного падения
-        if self.onWall_timer <= 0 or self.onGround or self.wall_jump_done:
-            self.gravity = GRAVITY
-            
-            if self.onGround or self.wall_jump_done:
-                self.onWall = False
-                self.onWall_timer = 1.2
-                self.wall_start = False
-                self.wall_jump_done = False
-                self.dash_done = False
-
     def gravitation(self):
         # Реализация силы притяжения
         if self.vel.y <= 12.5:
@@ -91,7 +69,7 @@ class Hero(pygame.sprite.Sprite):
                 self.rect.bottom = hits[0].rect.top
                 self.onGround = True
                 self.double_jump = False
-                self.wall_jump_done = False
+                self.onWall = False
                 self.vel.y = 0
             
             if yvel < 0:
@@ -109,6 +87,3 @@ class Hero(pygame.sprite.Sprite):
         # Если персонаж коснулся земли, возобновляем возможность рывка
         if self.dash_done:
             self.dash_cooldown(dt) # Ограничиваем частоту нажатий
-
-        if self.onWall:
-            self.onWall_cd(dt)
