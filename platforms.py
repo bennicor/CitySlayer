@@ -54,7 +54,7 @@ class MovingPlatform(FloorPlatform):
     def __init__(self, x, y, group, dir):
         super().__init__(x, y, group)
         self.color = pygame.Color("red")
-        
+
         self.dir = dir
         self.counter = 0
         self.x = 2 if self.dir == ">" else -2
