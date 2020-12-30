@@ -73,8 +73,8 @@ def main_menu():
         click = False
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
+                quit_game()
+
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     click = True
@@ -122,6 +122,7 @@ def pause_menu():
 
         if button_exit.collidepoint((x, y)):
             if click:
+                save_game() # При выходе в главное меню сохраняем игру
                 main_menu()
 
         click = False
