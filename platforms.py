@@ -55,9 +55,8 @@ class MovingPlatform(FloorPlatform):
         super().__init__(x, y, group)
         self.color = pygame.Color("red")
 
-        self.dir = dir
         self.counter = 0
-        self.x = 2 if self.dir == ">" else -2
+        self.x = 2 if dir == ">" else -2
 
         self.image = pygame.Surface((self.width, self.height))
         self.image.fill(self.color)

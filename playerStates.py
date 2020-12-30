@@ -66,7 +66,29 @@ class JumpState:
         self.next_state = next_state
 
     def handle_event(self, player, event):
-        pass
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LEFT:
+                player.last_dir = "left"
+                self.next_state = MoveState(-HERO_SPEED)
+            elif event.key == pygame.K_RIGHT:
+                player.last_dir = "right"
+                self.next_state = MoveState(HERO_SPEED)
+            elif event.key == pygame.K_a:
+                player.last_dir = "left"
+                self.next_state = MoveState(-HERO_SPEED)
+            elif event.key == pygame.K_d:
+                player.last_dir = "right"
+                self.next_state = MoveState(HERO_SPEED)
+
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.K_LEFT:
+                self.next_state = IdleState()
+            elif event.key == pygame.K_RIGHT:
+                self.next_state = IdleState()
+            elif event.key == pygame.K_a:
+                self.next_state = IdleState()
+            elif event.key == pygame.K_d:
+                self.next_state = IdleState()
 
     def update(self, player, dt, platforms):
         if player.onGround:
@@ -100,7 +122,29 @@ class WallJumpState:
         self.next_state = next_state
 
     def handle_event(self, player, event):
-        pass
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LEFT:
+                player.last_dir = "left"
+                self.next_state = MoveState(-HERO_SPEED)
+            elif event.key == pygame.K_RIGHT:
+                player.last_dir = "right"
+                self.next_state = MoveState(HERO_SPEED)
+            elif event.key == pygame.K_a:
+                player.last_dir = "left"
+                self.next_state = MoveState(-HERO_SPEED)
+            elif event.key == pygame.K_d:
+                player.last_dir = "right"
+                self.next_state = MoveState(HERO_SPEED)
+
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.K_LEFT:
+                self.next_state = IdleState()
+            elif event.key == pygame.K_RIGHT:
+                self.next_state = IdleState()
+            elif event.key == pygame.K_a:
+                self.next_state = IdleState()
+            elif event.key == pygame.K_d:
+                self.next_state = IdleState()
 
     def update(self, player, dt, platforms):
         # Игрок не может прыгать с большой скоростью

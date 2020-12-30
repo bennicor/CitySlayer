@@ -28,7 +28,7 @@ class Hero(pygame.sprite.Sprite):
         self.touched_wall = False
 
         # Инициализация wall jump
-        self.wall_jump_timer = .2
+        self.wall_jump_timer = .3
         self.wall_jump_done = False
         self.timer_cd = .1
 
@@ -65,7 +65,7 @@ class Hero(pygame.sprite.Sprite):
         self.wall_jump_timer -= dt
 
         if self.wall_jump_timer <= 0:
-            self.wall_jump_timer = .2
+            self.wall_jump_timer = .3
             self.wall_jump_done = False
 
     # Позволяет игроку делать прыжок в противоположную сторону
@@ -92,8 +92,7 @@ class Hero(pygame.sprite.Sprite):
         self.onGround = False
         
         if hits: # если есть пересечение платформы с игроком
-            # Если есть пересечение с двигающейся платформой, персонаж двигается вместе с ней
-            if isinstance(hits[0], MovingPlatform):
+            if isinstance(hits[0], MovingPlatform):    # Если есть пересечение с двигающейся платформой, персонаж двигается вместе с ней
                 self.rect.x += hits[0].x
 
             if yvel > 0:
@@ -109,7 +108,6 @@ class Hero(pygame.sprite.Sprite):
                 if not self.onGround and hits[0].can_wall_jump:
                     self.onWall = True
                     self.wall_pos = "right"
-                    # self.wall_jump_done = False
 
                     if not self.touched_wall:
                         self.falling = False
@@ -121,7 +119,6 @@ class Hero(pygame.sprite.Sprite):
                 if not self.onGround and hits[0].can_wall_jump:
                     self.onWall = True
                     self.wall_pos = "left"
-                    # self.wall_jump_done = False
 
                     if not self.touched_wall:
                         self.falling = False
@@ -138,6 +135,7 @@ class Hero(pygame.sprite.Sprite):
         if self.onGround:
             self.onWall = False
             self.sliding_timer = 1
+            self.wall_jump_timer = .3
             self.falling = False
             self.double_jump = False
             self.wall_jump_done = False
