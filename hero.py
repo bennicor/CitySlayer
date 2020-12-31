@@ -5,6 +5,7 @@ from platforms import *
 
 WIDTH, HEIGHT = 1280, 720
 GRAVITY = 1.5
+SLIDING_SPEED = .1
 
 
 # Класс персонажа
@@ -23,7 +24,8 @@ class Hero(pygame.sprite.Sprite):
         self.onWall = False
         self.wall_pos = ""
         self.isSliding = False
-        self.sliding_timer = 1
+        self.wall_first_touch = True
+        self.sliding_timer = .7
         self.falling = False
         self.touched_wall = False
 
@@ -55,11 +57,14 @@ class Hero(pygame.sprite.Sprite):
     def sliding(self, dt):
         self.sliding_timer -= dt
 
-        self.vel.y = 0
-        self.gravity = 0
+        if self.wall_first_touch:
+            self.vel.y = 0
+            self.gravity = SLIDING_SPEED
+            self.wall_first_touch = False
 
         if self.sliding_timer <= 0:
             self.falling = True
+            self.wall_first_touch = True
 
     def wall_jump_cd(self, dt):
         self.wall_jump_timer -= dt
@@ -134,12 +139,13 @@ class Hero(pygame.sprite.Sprite):
     def update(self, dt, platforms):
         if self.onGround:
             self.onWall = False
-            self.sliding_timer = 1
+            self.sliding_timer = .7
             self.wall_jump_timer = .3
             self.falling = False
             self.double_jump = False
             self.wall_jump_done = False
             self.touched_wall = False
+            self.wall_first_touch = True
 
         self.isSliding = False
         self.state.update(self, dt, platforms)

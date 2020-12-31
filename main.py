@@ -1,9 +1,10 @@
 import pygame
 import sys
+import os
 from platforms import FloorPlatform, WallPlatform, MovingPlatform
 from hero import Hero
 from playerStates import IdleState
-from gui_helper import *
+from helpers import *
 from checkbox import Checkbox
 
 
@@ -11,10 +12,16 @@ pygame.init()
 size = WIDTH, HEIGHT = 1280, 720
 screen = pygame.display.set_mode(size)
 
+# Загружаем сохранения, если они есть
+if os.path.exists("saves.txt"):
+    start_x, start_y, music, sounds, adult_content = load_game()
+else:
+    start_x, start_y = 50, 60
+    music = sounds = adult_content = True
 
-title_font = pygame.font.Font("pixel_font.ttf", 120)
-pause_font = pygame.font.Font("pixel_font.ttf", 80)
-font = pygame.font.Font("pixel_font.ttf", 50)
+title_font = pygame.font.Font("fonts/pixel_font.ttf", 120)
+pause_font = pygame.font.Font("fonts/pixel_font.ttf", 80)
+font = pygame.font.Font("fonts/pixel_font.ttf", 50)
 
 bg = pygame.image.load("images/bg.jpg")
 bg = pygame.transform.scale(bg, (WIDTH, HEIGHT))
@@ -67,14 +74,11 @@ def main_menu():
 
         if button_exit.collidepoint((x, y)):
             if click:
-                pygame.quit()
-                sys.exit()
+                save_game(hero, music, sounds, adult_content) # При выходе из игры сохраняемся
+                quit_game()
 
         click = False
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                quit_game()
-
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     click = True
@@ -95,7 +99,7 @@ def pause_menu():
     pause = True
     click = False
     
-    while pause:        
+    while pause:
         button_continue = pygame.Rect(500, 300, 280, 65)
         button_options = pygame.Rect(500, 430, 280, 65)
         button_exit = pygame.Rect(500, 560, 280, 65)
@@ -122,7 +126,7 @@ def pause_menu():
 
         if button_exit.collidepoint((x, y)):
             if click:
-                save_game() # При выходе в главное меню сохраняем игру
+                save_game(hero, music, sounds, adult_content) # При выходе в главное меню сохраняем игру
                 main_menu()
 
         click = False
@@ -140,19 +144,23 @@ def pause_menu():
 
 # Прорисовка меню настроек
 def options():
+    global music, sounds, adult_content
+
     # Затемнение фона
     background = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA, 32)
     background.fill((96, 0, 159, 50))
     background = menu_setup(background, "Options")
 
-    checkbox_music = Checkbox(screen, WIDTH * 0.6, HEIGHT * 0.4, checked=False)
-    checkbox_adult = Checkbox(screen, WIDTH * 0.6, HEIGHT * 0.6)
+    checkbox_music = Checkbox(screen, WIDTH * 0.6, HEIGHT * 0.4, checked=music)
+    checkbox_sounds = Checkbox(screen, WIDTH * 0.6, HEIGHT * 0.6, checked=sounds)
+    checkbox_adult = Checkbox(screen, WIDTH * 0.6, HEIGHT * 0.8, checked=adult_content)
 
     running = True
 
     while running:
         render_text("Music", font, pygame.Color("#c2c1bf"), screen, WIDTH // 3, HEIGHT * 0.425)
-        render_text("Adult Content", font, pygame.Color("#c2c1bf"), screen, WIDTH // 3, HEIGHT * 0.625)
+        render_text("Sounds", font, pygame.Color("#c2c1bf"), screen, WIDTH // 3, HEIGHT * 0.625)
+        render_text("Adult Content", font, pygame.Color("#c2c1bf"), screen, WIDTH // 3, HEIGHT * 0.825)
 
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
@@ -160,16 +168,32 @@ def options():
                     running = False
                     
             checkbox_music.onCheckbox(event)
+            checkbox_sounds.onCheckbox(event)
             checkbox_adult.onCheckbox(event)
 
         checkbox_music.update()
+        checkbox_sounds.update()
         checkbox_adult.update()
 
         # Отключаем музыку
-        if checkbox_music.checked:
-            pass
+        if not checkbox_music.checked:
+            music = False
+        else:
+            music = True
+
+        # Отключаем звуки
+        if not checkbox_sounds.checked:
+            sounds = False
+        else:
+            sounds = True
+
+        if not checkbox_adult.checked:
+            adult_content = False
+        else:
+            adult_content = True
 
         pygame.display.flip()
+
 
 # Прорисовка карты уровня
 level = [
@@ -217,7 +241,7 @@ platform_sprites = pygame.sprite.Group()
 platforms = [] # объекты, с которыми будет происходить взаимодействие
 
 hero_sprites = pygame.sprite.Group()
-hero = Hero((500, 100), hero_sprites)
+hero = Hero((start_x, start_y), hero_sprites)
 render(level)
 
 

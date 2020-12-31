@@ -1,5 +1,7 @@
 import pygame
 import sys
+import pickle
+
 
 def render_text(text, font, color, surface, x, y):
     text = font.render(text, 1, color)
@@ -13,8 +15,16 @@ def draw_button(screen, color1, color2, button, border):
 
 def quit_game():
     pygame.quit()
-    sys.quit()
+    sys.exit()
 
-def save_game():
-    # Добавить возможность сохранения
-    pass
+def save_game(hero, music, sounds, adult_content):
+    saves = [hero.rect.x, hero.rect.y, music, sounds, adult_content]
+
+    with open("saves.txt", "wb") as f:
+        pickle.dump(saves, f)
+
+def load_game():
+    with open("saves.txt", "rb") as f:
+        saves = pickle.load(f)
+
+    return saves
