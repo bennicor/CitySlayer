@@ -2,7 +2,7 @@ import pygame
 from random import randrange
 import os
 
-WIDTH = HEIGHT = 48
+width = height = 48
 
 # загрузка изображения
 
@@ -12,7 +12,7 @@ def load_image(name, color_keys=None):
 
     try:
         image = pygame.image.load(full_name)
-        image = pygame.transform.scale(image, (WIDTH, HEIGHT))
+        image = pygame.transform.scale(image, (width, height))
     except pygame.error as message:
         print('не удалось загрузить', name)
         raise SystemExit(message)
@@ -31,8 +31,8 @@ floor = [
 class FloorPlatform(pygame.sprite.Sprite):
     def __init__(self, x, y, group):
         super().__init__(group)
-        self.width = WIDTH
-        self.height = HEIGHT
+        self.width = width
+        self.height = height
         self.can_wall_jump = False
 
         self.image = floor[randrange(3)]

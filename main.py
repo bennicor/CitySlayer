@@ -217,7 +217,6 @@ level = [
 # Выводим на экран все платформы на уровне
 def render(level):
     x = y = 0
-
     for row in level:
         for col in row:
             if col == "_":
@@ -232,7 +231,6 @@ def render(level):
             elif col == "<":
                 pf = MovingPlatform(x, y, platform_sprites, "<")
                 platforms.append(pf)
-
             x += pf.width
         y += pf.height
         x = 0
