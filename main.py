@@ -1,6 +1,6 @@
-import pygame
-import sys
 import os
+import pygame
+# import sys
 from platforms import FloorPlatform, WallPlatform, MovingPlatform
 from hero import Hero
 from playerStates import IdleState
@@ -21,7 +21,7 @@ else:
 
 title_font = pygame.font.Font("fonts/pixel_font.ttf", 120)
 pause_font = pygame.font.Font("fonts/pixel_font.ttf", 80)
-font = pygame.font.Font("fonts/pixel_font.ttf", 50)
+FONT = pygame.font.Font("fonts/pixel_font.ttf", 50)
 
 bg = pygame.image.load("images/bg.jpg")
 bg = pygame.transform.scale(bg, (WIDTH, HEIGHT))
@@ -56,9 +56,9 @@ def main_menu():
 
         # Отрисовка текста
         render_text("Game Title", title_font, pygame.Color("#c2c1bf"), screen, WIDTH // 2, HEIGHT // 4)
-        render_text("Start Game", font, pygame.Color("#c2c1bf"), screen, WIDTH // 2, 330)
-        render_text("Options", font, pygame.Color("#c2c1bf"), screen, WIDTH // 2, 460)
-        render_text("Exit", font, pygame.Color("#c2c1bf"), screen, WIDTH // 2, 590)
+        render_text("Start Game", FONT, pygame.Color("#c2c1bf"), screen, WIDTH // 2, 330)
+        render_text("Options", FONT, pygame.Color("#c2c1bf"), screen, WIDTH // 2, 460)
+        render_text("Exit", FONT, pygame.Color("#c2c1bf"), screen, WIDTH // 2, 590)
 
         # Координаты курсора
         x, y = pygame.mouse.get_pos()
@@ -108,9 +108,9 @@ def pause_menu():
         draw_button(screen, "#0a2a59", "#082145", button_options, 10)
         draw_button(screen, "#0a2a59", "#082145", button_exit, 10)
 
-        render_text("Continue", font, pygame.Color("#c2c1bf"), screen, WIDTH // 2, 330)
-        render_text("Options", font, pygame.Color("#c2c1bf"), screen, WIDTH // 2, 460)
-        render_text("Main Menu", font, pygame.Color("#c2c1bf"), screen, WIDTH // 2, 590)
+        render_text("Continue", FONT, pygame.Color("#c2c1bf"), screen, WIDTH // 2, 330)
+        render_text("Options", FONT, pygame.Color("#c2c1bf"), screen, WIDTH // 2, 460)
+        render_text("Main Menu", FONT, pygame.Color("#c2c1bf"), screen, WIDTH // 2, 590)
 
         x, y = pygame.mouse.get_pos()
 
@@ -158,9 +158,9 @@ def options():
     running = True
 
     while running:
-        render_text("Music", font, pygame.Color("#c2c1bf"), screen, WIDTH // 3, HEIGHT * 0.425)
-        render_text("Sounds", font, pygame.Color("#c2c1bf"), screen, WIDTH // 3, HEIGHT * 0.625)
-        render_text("Adult Content", font, pygame.Color("#c2c1bf"), screen, WIDTH // 3, HEIGHT * 0.825)
+        render_text("Music", FONT, pygame.Color("#c2c1bf"), screen, WIDTH // 3, HEIGHT * 0.425)
+        render_text("Sounds", FONT, pygame.Color("#c2c1bf"), screen, WIDTH // 3, HEIGHT * 0.625)
+        render_text("Adult Content", FONT, pygame.Color("#c2c1bf"), screen, WIDTH // 3, HEIGHT * 0.825)
 
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:

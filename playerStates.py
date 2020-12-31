@@ -10,9 +10,9 @@ GRAVITY = 1.5
 # Инициализация классов состояния персонажа
 class DashState:
     def __init__(self, velocity_x, next_state):
-        self.dash_timer = .15 # Длительность рывка
+        self.dash_timer = .15  # Длительность рывка
         self.velocity_x = velocity_x
-        self.next_state = next_state # Следующее состояние
+        self.next_state = next_state  # Следующее состояние
 
     def handle_event(self, player, event):
         if event.type == pygame.KEYDOWN:
@@ -40,8 +40,8 @@ class DashState:
                 self.next_state = IdleState()
 
     def update(self, player, dt, platforms):
-        if not player.dash_done: # В воздухе может быть выполнен только один рывок
-            self.dash_timer -= dt # Таймер
+        if not player.dash_done:  # В воздухе может быть выполнен только один рывок
+            self.dash_timer -= dt  # Таймер
             self.velocity_x = DASH_SPEED
 
             # В зависимости от последнего направления персонажа вектор скорости рывка меняется
@@ -50,7 +50,7 @@ class DashState:
 
             player.rect.x += self.velocity_x
             player.collide(self.velocity_x, 0, platforms)
-            
+
             # Если таймер истек
             if self.dash_timer <= 0:
                 player.vel.y = 0
@@ -150,7 +150,7 @@ class WallJumpState:
         # Игрок не может прыгать с большой скоростью
         if not player.wall_jump_done:
             self.velocity_x = self.velocity_x if player.last_dir == "left" else -self.velocity_x
-            
+
             player.vel.x = self.velocity_x
             player.rect.x += self.velocity_x
             player.collide(player.vel.x, 0, platforms)
@@ -158,7 +158,7 @@ class WallJumpState:
             player.vel.y = self.velocity_y
             player.gravitation()
             player.collide(0, player.vel.y, platforms)
-        
+
             player.sliding_timer = .7
             player.timer_cd = .1
 
@@ -173,6 +173,7 @@ class WallJumpState:
             player.state = self.next_state
         else:
             player.state = self.next_state
+
 
 class MoveState:
     def __init__(self, velocity_x):
@@ -221,7 +222,7 @@ class MoveState:
                 player.isSliding = True
             else:
                 player.isSliding = True
-                
+
                 if not player.falling:
                     player.timer(dt)
 

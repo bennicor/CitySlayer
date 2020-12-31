@@ -5,6 +5,8 @@ import os
 WIDTH = HEIGHT = 48
 
 # загрузка изображения
+
+
 def load_image(name, color_keys=None):
     full_name = os.path.join(name)
 
@@ -16,10 +18,13 @@ def load_image(name, color_keys=None):
         raise SystemExit(message)
     return image
 
-floor = [load_image('sprite_down/sprite_down_1.png'),
-         load_image('sprite_down/sprite_down_2.png'),
-         load_image('sprite_down/sprite_down_3.png'),
-         load_image('sprite_down/sprite_down_4.png')]
+
+floor = [
+    load_image('sprite_down/sprite_down_1.png'),
+    load_image('sprite_down/sprite_down_2.png'),
+    load_image('sprite_down/sprite_down_3.png'),
+    load_image('sprite_down/sprite_down_4.png')
+]
 
 
 # Пол
