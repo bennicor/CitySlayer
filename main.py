@@ -1,15 +1,24 @@
 import pygame
-import sys
 import os
+import configparser
 from platforms import FloorPlatform, WallPlatform, MovingPlatform
 from hero import Hero
 from playerStates import IdleState
 from helpers import *
-from checkbox import Checkbox
+from gui_elements.checkbox import Checkbox
+from gui_elements.buttons import Button
 
 
 pygame.init()
-size = WIDTH, HEIGHT = 1280, 720
+
+# Импорт настроек
+config = configparser.ConfigParser()
+config.read("settings.ini")
+
+width = config.getfloat('MAIN', 'height')
+height = config.getfloat('MAIN', 'height')
+
+size = width, height = 1280, 720
 screen = pygame.display.set_mode(size)
 
 # Загружаем сохранения, если они есть
@@ -24,14 +33,17 @@ pause_font = pygame.font.Font("fonts/pixel_font.ttf", 80)
 font = pygame.font.Font("fonts/pixel_font.ttf", 50)
 
 bg = pygame.image.load("images/bg.jpg")
-bg = pygame.transform.scale(bg, (WIDTH, HEIGHT))
+bg = pygame.transform.scale(bg, (width, height))
+
 
 def menu_setup(background, title):
     screen.fill(pygame.Color("black"))
     screen.blit(background, (0, 0))
     background = screen.copy()
-    render_text(title, pause_font, pygame.Color("#c2c1bf"), screen, WIDTH // 2, HEIGHT * 0.2)
+
+    render_text(title, pause_font, pygame.Color("#c2c1bf"), screen, width // 2, height * 0.2)
     pygame.display.flip()
+    
     return background
 
 # Прорисовка главного меню
@@ -39,43 +51,41 @@ def main_menu():
     pygame.mouse.set_visible(True)
     click = False
     
+    # Инициализация кнопок меню
+    button_start = Button(screen, 500, 300, 280, 65)
+    button_options = Button(screen, 500, 430, 280, 65)
+    button_exit = Button(screen, 500, 560, 280, 65)
+
     while True:
+        # Ставим картинку на задний фон
         screen.fill(pygame.Color("black"))
         screen.blit(bg, (0, 0))
-
-        pygame.mouse.set_visible(True)
-
-        # Отрисовка кнопок
-        button_start = pygame.Rect(500, 300, 280, 65)
-        button_options = pygame.Rect(500, 430, 280, 65)
-        button_exit = pygame.Rect(500, 560, 280, 65)
-
-        draw_button(screen, "#0a2a59", "#082145", button_start, 10)
-        draw_button(screen, "#0a2a59", "#082145", button_options, 10)
-        draw_button(screen, "#0a2a59", "#082145", button_exit, 10)
-
-        # Отрисовка текста
-        render_text("Game Title", title_font, pygame.Color("#c2c1bf"), screen, WIDTH // 2, HEIGHT // 4)
-        render_text("Start Game", font, pygame.Color("#c2c1bf"), screen, WIDTH // 2, 330)
-        render_text("Options", font, pygame.Color("#c2c1bf"), screen, WIDTH // 2, 460)
-        render_text("Exit", font, pygame.Color("#c2c1bf"), screen, WIDTH // 2, 590)
 
         # Координаты курсора
         x, y = pygame.mouse.get_pos()
 
+        # Отрисовка кнопок
+        button_start.update()
+        button_options.update()
+        button_exit.update()
+
+        # Отрисовка текста
+        render_text("Game Title", title_font, pygame.Color("#c2c1bf"), screen, width // 2, height // 4)
+        render_text("Start Game", font, pygame.Color("#c2c1bf"), screen, width // 2, 330)
+        render_text("Options", font, pygame.Color("#c2c1bf"), screen, width // 2, 460)
+        render_text("Exit", font, pygame.Color("#c2c1bf"), screen, width // 2, 590)
+
+
         # Проверяем нажатие на кнопки
-        if button_start.collidepoint((x, y)):
-            if click:
-                game()
+        if button_start.collide((x, y)) and click:
+            game()
 
-        if button_options.collidepoint((x, y)):
-            if click:
-                options()
+        if button_options.collide((x, y)) and click:
+            options()
 
-        if button_exit.collidepoint((x, y)):
-            if click:
-                save_game(hero, music, sounds, adult_content) # При выходе из игры сохраняемся
-                quit_game()
+        if button_exit.collide((x, y)) and click:
+            save_game(hero, music, sounds, adult_content) # При выходе из игры сохраняемся
+            quit_game()
 
         click = False
         for event in pygame.event.get():
@@ -87,10 +97,14 @@ def main_menu():
 
 # Проработка меню паузы
 def pause_menu():
-    # Затемнение фона
-    background = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA, 32)
+    # Затенение фона
+    background = pygame.Surface((width, height), pygame.SRCALPHA, 32)
     background.fill((96, 0, 159, 50))
     background = menu_setup(background, "Pause")
+
+    button_continue = Button(screen, 500, 300, 280, 65)
+    button_options = Button(screen, 500, 430, 280, 65)
+    button_exit = Button(screen, 500, 560, 280, 65)
 
     pygame.mouse.set_visible(True)
 
@@ -100,41 +114,33 @@ def pause_menu():
     click = False
     
     while pause:
-        button_continue = pygame.Rect(500, 300, 280, 65)
-        button_options = pygame.Rect(500, 430, 280, 65)
-        button_exit = pygame.Rect(500, 560, 280, 65)
-
-        draw_button(screen, "#0a2a59", "#082145", button_continue, 10)
-        draw_button(screen, "#0a2a59", "#082145", button_options, 10)
-        draw_button(screen, "#0a2a59", "#082145", button_exit, 10)
-
-        render_text("Continue", font, pygame.Color("#c2c1bf"), screen, WIDTH // 2, 330)
-        render_text("Options", font, pygame.Color("#c2c1bf"), screen, WIDTH // 2, 460)
-        render_text("Main Menu", font, pygame.Color("#c2c1bf"), screen, WIDTH // 2, 590)
-
         x, y = pygame.mouse.get_pos()
 
+        button_continue.update()
+        button_options.update()
+        button_exit.update()
+
+        render_text("Continue", font, pygame.Color("#c2c1bf"), screen, width // 2, 330)
+        render_text("Options", font, pygame.Color("#c2c1bf"), screen, width // 2, 460)
+        render_text("Main Menu", font, pygame.Color("#c2c1bf"), screen, width // 2, 590)
+
         # Проверяем нажатие на кнопки
-        if button_continue.collidepoint((x, y)):
-            if click:
-                game()
+        if button_continue.collide((x, y)) and click:
+            pause = False
 
-        if button_options.collidepoint((x, y)):
-            if click:
-                options()
-                menu_setup(background, "Pause")
+        if button_options.collide((x, y)) and click:
+            options()
+            menu_setup(background, "Pause")
 
-        if button_exit.collidepoint((x, y)):
-            if click:
-                save_game(hero, music, sounds, adult_content) # При выходе в главное меню сохраняем игру
-                main_menu()
+        if button_exit.collide((x, y)) and click:
+            save_game(hero, music, sounds, adult_content) # Сохраняемся при выходе из игры
+            main_menu()
 
         click = False
-        for event in pygame.event.get():                
+        for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     pause = False
-                    pygame.mouse.set_visible(False)
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
@@ -147,20 +153,20 @@ def options():
     global music, sounds, adult_content
 
     # Затемнение фона
-    background = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA, 32)
+    background = pygame.Surface((width, height), pygame.SRCALPHA, 32)
     background.fill((96, 0, 159, 50))
     background = menu_setup(background, "Options")
 
-    checkbox_music = Checkbox(screen, WIDTH * 0.6, HEIGHT * 0.4, checked=music)
-    checkbox_sounds = Checkbox(screen, WIDTH * 0.6, HEIGHT * 0.6, checked=sounds)
-    checkbox_adult = Checkbox(screen, WIDTH * 0.6, HEIGHT * 0.8, checked=adult_content)
+    checkbox_music = Checkbox(screen, width * 0.6, height * 0.4, checked=music)
+    checkbox_sounds = Checkbox(screen, width * 0.6, height * 0.6, checked=sounds)
+    checkbox_adult = Checkbox(screen, width * 0.6, height * 0.8, checked=adult_content)
 
     running = True
 
     while running:
-        render_text("Music", font, pygame.Color("#c2c1bf"), screen, WIDTH // 3, HEIGHT * 0.425)
-        render_text("Sounds", font, pygame.Color("#c2c1bf"), screen, WIDTH // 3, HEIGHT * 0.625)
-        render_text("Adult Content", font, pygame.Color("#c2c1bf"), screen, WIDTH // 3, HEIGHT * 0.825)
+        render_text("Music", font, pygame.Color("#c2c1bf"), screen, width // 3, height * 0.425)
+        render_text("Sounds", font, pygame.Color("#c2c1bf"), screen, width // 3, height * 0.625)
+        render_text("Adult Content", font, pygame.Color("#c2c1bf"), screen, width // 3, height * 0.825)
 
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:

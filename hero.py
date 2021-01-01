@@ -1,11 +1,15 @@
 import pygame
+import configparser
 from pygame.math import Vector2
 from playerStates import IdleState
 from platforms import *
 
-WIDTH, HEIGHT = 1280, 720
-GRAVITY = 1.5
-SLIDING_SPEED = .1
+
+config = configparser.ConfigParser()
+config.read("settings.ini")
+
+gravity = config.getfloat('PLAYER', 'gravity')
+sliding_speed = config.getfloat('PLAYER', 'sliding_speed')
 
 
 # Класс персонажа
@@ -16,7 +20,7 @@ class Hero(pygame.sprite.Sprite):
         self.pos = Vector2(pos)
         self.width = 30
         self.height = 50
-        self.gravity = GRAVITY
+        self.gravity = gravity
 
         self.onGround = False
 
@@ -59,7 +63,7 @@ class Hero(pygame.sprite.Sprite):
 
         if self.wall_first_touch:
             self.vel.y = 0
-            self.gravity = SLIDING_SPEED
+            self.gravity = sliding_speed
             self.wall_first_touch = False
 
         if self.sliding_timer <= 0:
@@ -158,7 +162,7 @@ class Hero(pygame.sprite.Sprite):
         if self.isSliding and not self.falling:
             self.sliding(dt)
         else:
-            self.gravity = GRAVITY
+            self.gravity = gravity
 
         if self.wall_jump_done:
             self.wall_jump_cd(dt) # Ограничиваем частоту прыжков

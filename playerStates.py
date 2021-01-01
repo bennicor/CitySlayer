@@ -1,11 +1,15 @@
 import pygame
+import configparser
+import json
 
-HERO_SPEED = 8.5
-JUMP_FORCE = 21.5
-DASH_SPEED = 20
-WALL_JUMP = (30, -20)
-GRAVITY = 1.5
 
+config = configparser.ConfigParser()
+config.read("settings.ini")
+
+hero_speed = config.getfloat('PLAYER', 'hero_speed')
+jump_force = config.getfloat('PLAYER', 'jump_force')
+dash_speed = config.getint('PLAYER', 'dash_speed')
+wall_jump = json.loads(config.get("PLAYER", "wall_jump"))
 
 # Инициализация классов состояния персонажа
 class DashState:
@@ -18,16 +22,16 @@ class DashState:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
                 player.last_dir = "left"
-                self.next_state = MoveState(-HERO_SPEED)
+                self.next_state = MoveState(-hero_speed)
             elif event.key == pygame.K_RIGHT:
                 player.last_dir = "right"
-                self.next_state = MoveState(HERO_SPEED)
+                self.next_state = MoveState(hero_speed)
             elif event.key == pygame.K_a:
                 player.last_dir = "left"
-                self.next_state = MoveState(-HERO_SPEED)
+                self.next_state = MoveState(-hero_speed)
             elif event.key == pygame.K_d:
                 player.last_dir = "right"
-                self.next_state = MoveState(HERO_SPEED)
+                self.next_state = MoveState(hero_speed)
 
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT:
@@ -42,7 +46,7 @@ class DashState:
     def update(self, player, dt, platforms):
         if not player.dash_done: # В воздухе может быть выполнен только один рывок
             self.dash_timer -= dt # Таймер
-            self.velocity_x = DASH_SPEED
+            self.velocity_x = dash_speed
 
             # В зависимости от последнего направления персонажа вектор скорости рывка меняется
             if player.last_dir == "left":
@@ -69,16 +73,16 @@ class JumpState:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
                 player.last_dir = "left"
-                self.next_state = MoveState(-HERO_SPEED)
+                self.next_state = MoveState(-hero_speed)
             elif event.key == pygame.K_RIGHT:
                 player.last_dir = "right"
-                self.next_state = MoveState(HERO_SPEED)
+                self.next_state = MoveState(hero_speed)
             elif event.key == pygame.K_a:
                 player.last_dir = "left"
-                self.next_state = MoveState(-HERO_SPEED)
+                self.next_state = MoveState(-hero_speed)
             elif event.key == pygame.K_d:
                 player.last_dir = "right"
-                self.next_state = MoveState(HERO_SPEED)
+                self.next_state = MoveState(hero_speed)
 
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT:
@@ -117,24 +121,24 @@ class DoubleJumpState(JumpState):
 
 class WallJumpState:
     def __init__(self, velocity_x, velocity_y, next_state):
-        self.velocity_y = velocity_y
-        self.velocity_x = velocity_x
+        self.velocity_y = int(velocity_y)
+        self.velocity_x = int(velocity_x)
         self.next_state = next_state
 
     def handle_event(self, player, event):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
                 player.last_dir = "left"
-                self.next_state = MoveState(-HERO_SPEED)
+                self.next_state = MoveState(-hero_speed)
             elif event.key == pygame.K_RIGHT:
                 player.last_dir = "right"
-                self.next_state = MoveState(HERO_SPEED)
+                self.next_state = MoveState(hero_speed)
             elif event.key == pygame.K_a:
                 player.last_dir = "left"
-                self.next_state = MoveState(-HERO_SPEED)
+                self.next_state = MoveState(-hero_speed)
             elif event.key == pygame.K_d:
                 player.last_dir = "right"
-                self.next_state = MoveState(HERO_SPEED)
+                self.next_state = MoveState(hero_speed)
 
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT:
@@ -181,26 +185,26 @@ class MoveState:
     def handle_event(self, player, event):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LSHIFT and player.last_dir:
-                return DashState(DASH_SPEED, player.state)
+                return DashState(dash_speed, player.state)
             elif event.key == pygame.K_LEFT:
                 player.last_dir = "left"
-                self.velocity_x = -HERO_SPEED
+                self.velocity_x = -hero_speed
             elif event.key == pygame.K_RIGHT:
                 player.last_dir = "right"
-                self.velocity_x = HERO_SPEED
+                self.velocity_x = hero_speed
             elif event.key == pygame.K_a:
                 player.last_dir = "left"
-                self.velocity_x = -HERO_SPEED
+                self.velocity_x = -hero_speed
             elif event.key == pygame.K_d:
                 player.last_dir = "right"
-                self.velocity_x = HERO_SPEED
+                self.velocity_x = hero_speed
             elif event.key == pygame.K_SPACE:
                 if player.double_jump and not player.onWall:
-                    return DoubleJumpState(JUMP_FORCE, player.state)
+                    return DoubleJumpState(jump_force, player.state)
                 elif player.isSliding and not player.wall_jump_done:
-                    return WallJumpState(WALL_JUMP[0], WALL_JUMP[1], player.state)
+                    return WallJumpState(wall_jump[0], wall_jump[1], player.state)
 
-                return JumpState(JUMP_FORCE, player.state)
+                return JumpState(jump_force, player.state)
 
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT and self.velocity_x < 0:
@@ -241,25 +245,25 @@ class IdleState:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
                 player.last_dir = "left"
-                return MoveState(-HERO_SPEED)
+                return MoveState(-hero_speed)
             elif event.key == pygame.K_RIGHT:
                 player.last_dir = "right"
-                return MoveState(HERO_SPEED)
+                return MoveState(hero_speed)
             elif event.key == pygame.K_a:
                 player.last_dir = "left"
-                return MoveState(-HERO_SPEED)
+                return MoveState(-hero_speed)
             elif event.key == pygame.K_d:
                 player.last_dir = "right"
-                return MoveState(HERO_SPEED)
+                return MoveState(hero_speed)
             elif event.key == pygame.K_LSHIFT and player.last_dir:
-                return DashState(DASH_SPEED, player.state)
+                return DashState(dash_speed, player.state)
             elif event.key == pygame.K_SPACE:
                 if player.double_jump and not player.onWall:
-                    return DoubleJumpState(JUMP_FORCE, player.state)
+                    return DoubleJumpState(jump_force, player.state)
                 elif player.isSliding and not player.wall_jump_done:
-                    return WallJumpState(WALL_JUMP[0], WALL_JUMP[1], player.state)
+                    return WallJumpState(wall_jump[0], wall_jump[1], player.state)
 
-                return JumpState(JUMP_FORCE, player.state)
+                return JumpState(jump_force, player.state)
 
     def update(self, player, dt, platforms):
         player.gravitation()
