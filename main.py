@@ -37,6 +37,15 @@ font = pygame.font.Font("fonts/pixel_font.ttf", 50)
 
 bg = load_image("images/bg.jpg", width, height)
 
+# Загружаем музыку
+load_music("sounds/main_theme.mp3")
+
+if music:
+    start_music()
+else:
+    start_music()
+    pause_music()
+
 def menu_setup(background, title):
     screen.fill(pygame.Color("black"))
     screen.blit(background, (0, 0))
@@ -190,6 +199,11 @@ def options():
         if button_back.collide((x, y)) and click:
             running = False
 
+        if not music:
+            pause_music()
+        else:
+            unpause_music()
+    
         # Отключаем музыку
         if not checkbox_music.checked:
             music = False
