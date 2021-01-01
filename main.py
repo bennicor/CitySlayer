@@ -1,6 +1,7 @@
 import pygame
 import os
 import configparser
+import json
 from platforms import FloorPlatform, WallPlatform, MovingPlatform
 from hero import Hero
 from playerStates import IdleState
@@ -15,26 +16,26 @@ pygame.init()
 config = configparser.ConfigParser()
 config.read("settings.ini")
 
-width = config.getfloat('MAIN', 'height')
-height = config.getfloat('MAIN', 'height')
+width = config.getint('MAIN', 'width')
+height = config.getint('MAIN', 'height')
 
-size = width, height = 1280, 720
+size = width, height
 screen = pygame.display.set_mode(size)
 
 # Загружаем сохранения, если они есть
 if os.path.exists("saves.txt"):
     start_x, start_y, music, sounds, adult_content = load_game()
 else:
-    start_x, start_y = 50, 60
-    music = sounds = adult_content = True
+    start_x, start_y = json.loads(config.get("MAIN", "start_pos"))
+    music = config.getboolean("MAIN", "music")
+    sounds = config.getboolean("MAIN", "sounds")
+    adult_content = config.getboolean("MAIN", "adult_content")
 
 title_font = pygame.font.Font("fonts/pixel_font.ttf", 120)
 pause_font = pygame.font.Font("fonts/pixel_font.ttf", 80)
 font = pygame.font.Font("fonts/pixel_font.ttf", 50)
 
-bg = pygame.image.load("images/bg.jpg")
-bg = pygame.transform.scale(bg, (width, height))
-
+bg = load_image("images/bg.jpg", width, height)
 
 def menu_setup(background, title):
     screen.fill(pygame.Color("black"))
@@ -43,7 +44,7 @@ def menu_setup(background, title):
 
     render_text(title, pause_font, pygame.Color("#c2c1bf"), screen, width // 2, height * 0.2)
     pygame.display.flip()
-    
+
     return background
 
 # Прорисовка главного меню
@@ -52,9 +53,9 @@ def main_menu():
     click = False
     
     # Инициализация кнопок меню
-    button_start = Button(screen, 500, 300, 280, 65)
-    button_options = Button(screen, 500, 430, 280, 65)
-    button_exit = Button(screen, 500, 560, 280, 65)
+    button_start = Button(screen, 500, 300, 280, 65, "Start Game", font)
+    button_options = Button(screen, 500, 430, 280, 65, "Options", font)
+    button_exit = Button(screen, 500, 560, 280, 65, "Exit", font)
 
     while True:
         # Ставим картинку на задний фон
@@ -65,16 +66,12 @@ def main_menu():
         x, y = pygame.mouse.get_pos()
 
         # Отрисовка кнопок
-        button_start.update()
-        button_options.update()
-        button_exit.update()
+        button_start.update((x, y))
+        button_options.update((x, y))
+        button_exit.update((x, y))
 
         # Отрисовка текста
         render_text("Game Title", title_font, pygame.Color("#c2c1bf"), screen, width // 2, height // 4)
-        render_text("Start Game", font, pygame.Color("#c2c1bf"), screen, width // 2, 330)
-        render_text("Options", font, pygame.Color("#c2c1bf"), screen, width // 2, 460)
-        render_text("Exit", font, pygame.Color("#c2c1bf"), screen, width // 2, 590)
-
 
         # Проверяем нажатие на кнопки
         if button_start.collide((x, y)) and click:
@@ -102,9 +99,9 @@ def pause_menu():
     background.fill((96, 0, 159, 50))
     background = menu_setup(background, "Pause")
 
-    button_continue = Button(screen, 500, 300, 280, 65)
-    button_options = Button(screen, 500, 430, 280, 65)
-    button_exit = Button(screen, 500, 560, 280, 65)
+    button_continue = Button(screen, 500, 300, 280, 65, "Continue", font)
+    button_options = Button(screen, 500, 430, 280, 65, "Options", font)
+    button_exit = Button(screen, 500, 560, 280, 65, "Main Menu", font)
 
     pygame.mouse.set_visible(True)
 
@@ -116,13 +113,9 @@ def pause_menu():
     while pause:
         x, y = pygame.mouse.get_pos()
 
-        button_continue.update()
-        button_options.update()
-        button_exit.update()
-
-        render_text("Continue", font, pygame.Color("#c2c1bf"), screen, width // 2, 330)
-        render_text("Options", font, pygame.Color("#c2c1bf"), screen, width // 2, 460)
-        render_text("Main Menu", font, pygame.Color("#c2c1bf"), screen, width // 2, 590)
+        button_continue.update((x, y))
+        button_options.update((x, y))
+        button_exit.update((x, y))
 
         # Проверяем нажатие на кнопки
         if button_continue.collide((x, y)) and click:
@@ -161,25 +154,41 @@ def options():
     checkbox_sounds = Checkbox(screen, width * 0.6, height * 0.6, checked=sounds)
     checkbox_adult = Checkbox(screen, width * 0.6, height * 0.8, checked=adult_content)
 
+    button_back = Button(screen, 20, 20, 75, 50, "<-", font)
+
     running = True
+    click = False
 
     while running:
+        x, y = pygame.mouse.get_pos()
+
+        # Отрисовка обьектов
+        checkbox_music.update()
+        checkbox_sounds.update()
+        checkbox_adult.update()
+        button_back.update((x, y))
+
+        # Отрисовка текста
         render_text("Music", font, pygame.Color("#c2c1bf"), screen, width // 3, height * 0.425)
         render_text("Sounds", font, pygame.Color("#c2c1bf"), screen, width // 3, height * 0.625)
         render_text("Adult Content", font, pygame.Color("#c2c1bf"), screen, width // 3, height * 0.825)
 
+        click = False
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     running = False
-                    
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    click = True
+
             checkbox_music.onCheckbox(event)
             checkbox_sounds.onCheckbox(event)
             checkbox_adult.onCheckbox(event)
 
-        checkbox_music.update()
-        checkbox_sounds.update()
-        checkbox_adult.update()
+        if button_back.collide((x, y)) and click:
+            running = False
 
         # Отключаем музыку
         if not checkbox_music.checked:
@@ -249,7 +258,6 @@ platforms = [] # объекты, с которыми будет происход
 hero_sprites = pygame.sprite.Group()
 hero = Hero((start_x, start_y), hero_sprites)
 render(level)
-
 
 def game():
     pygame.mouse.set_visible(False)

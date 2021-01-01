@@ -2,6 +2,7 @@ import pygame
 from random import randrange
 import os
 import configparser
+from helpers import load_image
 
 
 config = configparser.ConfigParser()
@@ -11,22 +12,10 @@ width = config.getint('PLATFORM', 'height')
 height = config.getint('PLATFORM', 'height')
 
 
-# загрузка изображения
-def load_image(name, color_keys=None):
-    full_name = os.path.join(name)
-
-    try:
-        image = pygame.image.load(full_name)
-        image = pygame.transform.scale(image, (width, height))
-    except pygame.error as message:
-        print('не удалось загрузить', name)
-        raise SystemExit(message)
-    return image
-
-floor = [load_image('sprite_down/sprite_down_1.png'),
-         load_image('sprite_down/sprite_down_2.png'),
-         load_image('sprite_down/sprite_down_3.png'),
-         load_image('sprite_down/sprite_down_4.png')]
+floor = [load_image('sprite_down/sprite_down_1.png', width, height),
+         load_image('sprite_down/sprite_down_2.png', width, height),
+         load_image('sprite_down/sprite_down_3.png', width, height),
+         load_image('sprite_down/sprite_down_4.png', width, height)]
 
 
 # Пол

@@ -1,7 +1,19 @@
 import pygame
 import sys
 import pickle
+import os
 
+
+def load_image(name, width, height, color_keys=None):
+    full_name = os.path.join(name)
+
+    try:
+        image = pygame.image.load(full_name)
+        image = pygame.transform.scale(image, (width, height))
+    except pygame.error as message:
+        print('не удалось загрузить', name)
+        raise SystemExit(message)
+    return image
 
 def render_text(text, font, color, surface, x, y):
     text = font.render(text, 1, color)
