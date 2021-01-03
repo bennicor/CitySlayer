@@ -21,6 +21,7 @@ class Hero(pygame.sprite.Sprite):
         self.width = 30
         self.height = 50
         self.gravity = gravity
+        self.end = False
 
         self.onGround = False
 
@@ -154,6 +155,9 @@ class Hero(pygame.sprite.Sprite):
         self.isSliding = False
         self.state.update(self, dt, platforms)
 
+        if self.rect.x >= 1000:
+            self.end = True
+            
         # Если персонаж коснулся земли, возобновляем возможность рывка
         if self.dash_done:
             self.dash_cooldown(dt) # Ограничиваем частоту нажатий

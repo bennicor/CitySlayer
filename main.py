@@ -280,6 +280,47 @@ def training():
 
         pygame.display.flip()
 
+def end_screen():
+    pygame.mouse.set_visible(True)
+    background = pygame.Surface((width, height), pygame.SRCALPHA, 32)
+    background.fill((96, 0, 159, 50))
+    background = menu_setup(background, "The End")
+
+    button_end = Button(screen, 500, height * 0.8, 280, 65, "Quit", font)
+
+    running = True
+    click = False
+
+    # Отрисовка текста
+    text_coords = height * 0.35
+    training_text = ["Game Created By",
+                     "",
+                     "Vlad Boldyrev",
+                     "Vladimir Sviridkin",
+                    ]
+
+    for line in training_text:
+        render_text(line, font, pygame.Color("#c2c1bf"), screen, width * 0.5, text_coords)
+        text_coords += 50
+
+    while running:
+        x, y = pygame.mouse.get_pos()
+
+        # Отрисовка обьектов
+        button_end.update((x, y))
+
+        click = False
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    click = True
+
+        if button_end.collide((x, y)) and click:
+            if saves:
+                os.remove("saves.txt")
+            quit_game()
+
+        pygame.display.flip()
 
 # Прорисовка карты уровня
 level = [
@@ -359,6 +400,9 @@ def game():
 
         hero_sprites.update(dt, platforms)
         hero_sprites.draw(screen)
+
+        if hero.end:
+            end_screen()
 
         dt = clock.tick(fps) / 1000
         pygame.display.flip()
