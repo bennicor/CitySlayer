@@ -22,8 +22,8 @@ class Hero(pygame.sprite.Sprite):
         self.height = 50
         self.gravity = gravity
         self.end = False
-
         self.onGround = False
+        self.sounds = True
 
         # Инициализация sliding
         self.onWall = False
@@ -101,8 +101,8 @@ class Hero(pygame.sprite.Sprite):
         hits = pygame.sprite.spritecollide(self, platforms, False)
         self.onGround = False
         
-        if hits: # если есть пересечение платформы с игроком
-            if isinstance(hits[0], MovingPlatform):    # Если есть пересечение с двигающейся платформой, персонаж двигается вместе с ней
+        if hits: # если есть пересечение платформы с игрокоместь
+            if isinstance(hits[0], MovingPlatform):    # Если  пересечение с двигающейся платформой, персонаж двигается вместе с ней
                 self.rect.x += hits[0].x
 
             if yvel > 0:
@@ -154,9 +154,6 @@ class Hero(pygame.sprite.Sprite):
 
         self.isSliding = False
         self.state.update(self, dt, platforms)
-
-        if self.rect.x >= 1000:
-            self.end = True
             
         # Если персонаж коснулся земли, возобновляем возможность рывка
         if self.dash_done:

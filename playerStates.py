@@ -1,6 +1,7 @@
 import pygame
 import configparser
 import json
+from helpers import load_sound, play_sound
 
 
 config = configparser.ConfigParser()
@@ -11,12 +12,23 @@ jump_force = config.getfloat('PLAYER', 'jump_force')
 dash_speed = config.getint('PLAYER', 'dash_speed')
 wall_jump = json.loads(config.get("PLAYER", "wall_jump"))
 
+# Загрузка звуков
+walk_sound = load_sound("data/sounds/walk2.wav")
+walk_sound.set_volume(0.3)
+jump_sound = load_sound("data/sounds/jump.wav")
+jump_sound.set_volume(0.3)
+dash_sound = load_sound("data/sounds/dash.wav")
+dash_sound.set_volume(0.2)
+
 # Инициализация классов состояния персонажа
 class DashState:
-    def __init__(self, velocity_x, next_state):
+    def __init__(self, velocity_x, next_state, player):
         self.dash_timer = .15 # Длительность рывка
         self.velocity_x = velocity_x
         self.next_state = next_state # Следующее состояние
+
+        if player.sounds and not player.dash_done:   # Воспроизводим звук
+            play_sound(dash_sound)
 
     def handle_event(self, player, event):
         if event.type == pygame.KEYDOWN:
@@ -44,7 +56,7 @@ class DashState:
                 self.next_state = IdleState()
 
     def update(self, player, dt, platforms):
-        if not player.dash_done: # В воздухе может быть выполнен только один рывок
+        if not player.dash_done: # В воздухе может быть выполнен только один рывок                
             self.dash_timer -= dt # Таймер
             self.velocity_x = dash_speed
 
@@ -95,6 +107,9 @@ class JumpState:
                 self.next_state = IdleState()
 
     def update(self, player, dt, platforms):
+        if player.sounds:   # Воспроизводим звук
+            play_sound(jump_sound)
+
         if player.onGround:
             player.vel.y = -self.velocity_y
             player.onGround = False
@@ -110,6 +125,9 @@ class DoubleJumpState(JumpState):
         super().__init__(velocity_y, next_state)
 
     def update(self, player, dt, platforms):
+        if player.sounds:   # Воспроизводим звук
+            play_sound(jump_sound)  
+
         player.vel.y = -self.velocity_y
 
         player.gravitation()
@@ -153,6 +171,9 @@ class WallJumpState:
     def update(self, player, dt, platforms):
         # Игрок не может прыгать с большой скоростью
         if not player.wall_jump_done:
+            if player.sounds:   # Воспроизводим звук
+                play_sound(jump_sound)
+
             self.velocity_x = self.velocity_x if player.last_dir == "left" else -self.velocity_x
             
             player.vel.x = self.velocity_x
@@ -185,7 +206,7 @@ class MoveState:
     def handle_event(self, player, event):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LSHIFT and player.last_dir:
-                return DashState(dash_speed, player.state)
+                return DashState(dash_speed, player.state, player)
             elif event.key == pygame.K_LEFT:
                 player.last_dir = "left"
                 self.velocity_x = -hero_speed
@@ -219,6 +240,10 @@ class MoveState:
                 return IdleState()
 
     def update(self, player, dt, platforms):
+        # Воспроизводим звуки ходьбы
+        if player.onGround and player.sounds:
+            play_sound(walk_sound)
+
         # Если персонаж находится на стене и двигается в ее сторону, он начинает скользить
         if player.onWall and not player.onGround:
             if player.wall_pos == player.last_dir:
@@ -254,9 +279,9 @@ class IdleState:
                 return MoveState(-hero_speed)
             elif event.key == pygame.K_d:
                 player.last_dir = "right"
-                return MoveState(hero_speed)
+                return MoveState(hero_speed, player)
             elif event.key == pygame.K_LSHIFT and player.last_dir:
-                return DashState(dash_speed, player.state)
+                return DashState(dash_speed, player.state, player)
             elif event.key == pygame.K_SPACE:
                 if player.double_jump and not player.onWall:
                     return DoubleJumpState(jump_force, player.state)

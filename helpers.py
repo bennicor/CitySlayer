@@ -45,7 +45,7 @@ def load_game():
 pygame.mixer.init()
 def load_music(file):
     pygame.mixer.music.load(file)
-    pygame.mixer.music.set_volume(0.2)
+    pygame.mixer.music.set_volume(0.05)
 
 def start_music():
     pygame.mixer.music.play(loops=-1)
@@ -55,3 +55,9 @@ def unpause_music():
 
 def pause_music():
     pygame.mixer.music.pause()
+
+def load_sound(file):
+    return pygame.mixer.Sound(file)
+
+def play_sound(sound):
+    pygame.mixer.Sound.play(sound)

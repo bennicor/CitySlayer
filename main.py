@@ -239,10 +239,10 @@ def options():
         pygame.display.flip()
 
 # Прорисовка окна с обучением
-def training():
+def tutorial():
     background = pygame.Surface((width, height), pygame.SRCALPHA, 32)
     background.fill((96, 0, 159, 50))
-    background = menu_setup(background, "Training")
+    background = menu_setup(background, "Tutorial")
 
     button_start = Button(screen, 500, height * 0.8, 280, 65, "Start", font)
 
@@ -251,7 +251,7 @@ def training():
 
     # Отрисовка текста обучения
     text_coords = height * 0.3
-    training_text = ["Movement: LEFT and RIGHT",
+    tutorial_text = ["Movement: LEFT and RIGHT",
                      "Jump: Space",
                      "Dash: Left Shift",
                      "Extra Abilities:",
@@ -259,7 +259,7 @@ def training():
                      "  Wall Jump: Space(when on wall)"
                      ]
 
-    for line in training_text:
+    for line in tutorial_text:
         render_text(line, font, pygame.Color("#c2c1bf"), screen, width * 0.15, text_coords, align="left")
         text_coords += 50
 
@@ -286,20 +286,20 @@ def end_screen():
     background.fill((96, 0, 159, 50))
     background = menu_setup(background, "The End")
 
-    button_end = Button(screen, 500, height * 0.8, 280, 65, "Quit", font)
+    button_end = Button(screen, 500, height * 0.8, 280, 65, "Exit", font)
 
     running = True
     click = False
 
     # Отрисовка текста
     text_coords = height * 0.35
-    training_text = ["Game Created By",
+    tutorial_text = ["Game Created By",
                      "",
                      "Vlad Boldyrev",
                      "Vladimir Sviridkin",
                     ]
 
-    for line in training_text:
+    for line in tutorial_text:
         render_text(line, font, pygame.Color("#c2c1bf"), screen, width * 0.5, text_coords)
         text_coords += 50
 
@@ -374,7 +374,8 @@ render(level)
 
 
 def game():
-    global saves
+    global saves, sounds
+
     clock = pygame.time.Clock()
     fps = 60
     dt = 0
@@ -382,11 +383,17 @@ def game():
 
     # Вызываем экран с обучением
     if not saves:
-        training()
-
+        tutorial()
+    
     pygame.mouse.set_visible(False)
 
     while running:
+        # Отключаем звуки
+        if not sounds:
+            hero.sounds = False
+        else:
+            hero.sounds = True
+
         screen.fill(pygame.Color("black"))
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
