@@ -297,6 +297,8 @@ class IdleState:
                 return JumpState(jump_force, player.state)
 
     def update(self, player, dt, platforms):
-        stop_sound()
+        if player.onGround:
+            stop_sound()
+            
         player.gravitation()
         player.collide(0, player.vel.y, platforms)
