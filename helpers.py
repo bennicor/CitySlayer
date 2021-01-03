@@ -15,10 +15,15 @@ def load_image(name, width, height, color_keys=None):
         raise SystemExit(message)
     return image
 
-def render_text(text, font, color, surface, x, y):
+def render_text(text, font, color, surface, x, y, align="center"):
     text = font.render(text, 1, color)
     text_rect = text.get_rect()
-    text_rect.center = (x, y)
+
+    if align == "center":
+        text_rect.center = (x, y)
+    elif align == "left":
+        text_rect = (x, y)
+        
     surface.blit(text, text_rect)
 
 def quit_game():

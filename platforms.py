@@ -12,10 +12,10 @@ width = config.getint('PLATFORM', 'height')
 height = config.getint('PLATFORM', 'height')
 
 
-floor = [load_image('sprite_down/sprite_down_1.png', width, height),
-         load_image('sprite_down/sprite_down_2.png', width, height),
-         load_image('sprite_down/sprite_down_3.png', width, height),
-         load_image('sprite_down/sprite_down_4.png', width, height)]
+floor = [load_image('data/sprite_down/sprite_down_1.png', width, height),
+         load_image('data/sprite_down/sprite_down_2.png', width, height),
+         load_image('data/sprite_down/sprite_down_3.png', width, height),
+         load_image('data/sprite_down/sprite_down_4.png', width, height)]
 
 
 # Пол
