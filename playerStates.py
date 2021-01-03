@@ -1,7 +1,8 @@
 import pygame
 import configparser
 import json
-from helpers import load_sound, play_sound
+import time
+from helpers import load_sound, play_sound, get_length, stop_sound
 
 
 config = configparser.ConfigParser()
@@ -13,12 +14,16 @@ dash_speed = config.getint('PLAYER', 'dash_speed')
 wall_jump = json.loads(config.get("PLAYER", "wall_jump"))
 
 # Загрузка звуков
-walk_sound = load_sound("data/sounds/walk2.wav")
+walk_sound = load_sound("data/sounds/walk.wav")
 walk_sound.set_volume(0.3)
+walk_time = get_length(walk_sound)
 jump_sound = load_sound("data/sounds/jump.wav")
 jump_sound.set_volume(0.3)
 dash_sound = load_sound("data/sounds/dash.wav")
-dash_sound.set_volume(0.2)
+dash_sound.set_volume(0.3)
+sliding_sound = load_sound("data/sounds/wall_slide.wav")
+sliding_sound.set_volume(0.3)
+slide_time = get_length(sliding_sound)
 
 # Инициализация классов состояния персонажа
 class DashState:
@@ -38,25 +43,19 @@ class DashState:
             elif event.key == pygame.K_RIGHT:
                 player.last_dir = "right"
                 self.next_state = MoveState(hero_speed)
-            elif event.key == pygame.K_a:
-                player.last_dir = "left"
-                self.next_state = MoveState(-hero_speed)
-            elif event.key == pygame.K_d:
-                player.last_dir = "right"
-                self.next_state = MoveState(hero_speed)
 
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT:
                 self.next_state = IdleState()
             elif event.key == pygame.K_RIGHT:
                 self.next_state = IdleState()
-            elif event.key == pygame.K_a:
-                self.next_state = IdleState()
-            elif event.key == pygame.K_d:
-                self.next_state = IdleState()
 
     def update(self, player, dt, platforms):
+        global walk_time, slide_time
+
         if not player.dash_done: # В воздухе может быть выполнен только один рывок                
+            walk_time = get_length(walk_sound)
+            slide_time = get_length(sliding_sound)
             self.dash_timer -= dt # Таймер
             self.velocity_x = dash_speed
 
@@ -89,28 +88,23 @@ class JumpState:
             elif event.key == pygame.K_RIGHT:
                 player.last_dir = "right"
                 self.next_state = MoveState(hero_speed)
-            elif event.key == pygame.K_a:
-                player.last_dir = "left"
-                self.next_state = MoveState(-hero_speed)
-            elif event.key == pygame.K_d:
-                player.last_dir = "right"
-                self.next_state = MoveState(hero_speed)
 
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT:
                 self.next_state = IdleState()
             elif event.key == pygame.K_RIGHT:
                 self.next_state = IdleState()
-            elif event.key == pygame.K_a:
-                self.next_state = IdleState()
-            elif event.key == pygame.K_d:
-                self.next_state = IdleState()
 
     def update(self, player, dt, platforms):
-        if player.sounds:   # Воспроизводим звук
-            play_sound(jump_sound)
+        global walk_time, slide_time
+
+        walk_time = get_length(walk_sound)
+        slide_time = get_length(sliding_sound)
 
         if player.onGround:
+            if player.sounds:   # Воспроизводим звук
+                play_sound(jump_sound)
+
             player.vel.y = -self.velocity_y
             player.onGround = False
             player.double_jump = True
@@ -125,6 +119,11 @@ class DoubleJumpState(JumpState):
         super().__init__(velocity_y, next_state)
 
     def update(self, player, dt, platforms):
+        global walk_time, slide_time
+
+        walk_time = get_length(walk_sound)
+        slide_time = get_length(sliding_sound)
+
         if player.sounds:   # Воспроизводим звук
             play_sound(jump_sound)  
 
@@ -151,12 +150,6 @@ class WallJumpState:
             elif event.key == pygame.K_RIGHT:
                 player.last_dir = "right"
                 self.next_state = MoveState(hero_speed)
-            elif event.key == pygame.K_a:
-                player.last_dir = "left"
-                self.next_state = MoveState(-hero_speed)
-            elif event.key == pygame.K_d:
-                player.last_dir = "right"
-                self.next_state = MoveState(hero_speed)
 
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT:
@@ -169,8 +162,12 @@ class WallJumpState:
                 self.next_state = IdleState()
 
     def update(self, player, dt, platforms):
+        global walk_time, slide_time
+
         # Игрок не может прыгать с большой скоростью
         if not player.wall_jump_done:
+            walk_time = get_length(walk_sound)
+            slide_time = get_length(sliding_sound)
             if player.sounds:   # Воспроизводим звук
                 play_sound(jump_sound)
 
@@ -201,22 +198,23 @@ class WallJumpState:
 
 class MoveState:
     def __init__(self, velocity_x):
+        global walk_time
+
         self.velocity_x = velocity_x
+        walk_time = get_length(walk_sound)
 
     def handle_event(self, player, event):
+        global walk_time
+
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LSHIFT and player.last_dir:
                 return DashState(dash_speed, player.state, player)
             elif event.key == pygame.K_LEFT:
+                walk_time = get_length(walk_sound)
                 player.last_dir = "left"
                 self.velocity_x = -hero_speed
             elif event.key == pygame.K_RIGHT:
-                player.last_dir = "right"
-                self.velocity_x = hero_speed
-            elif event.key == pygame.K_a:
-                player.last_dir = "left"
-                self.velocity_x = -hero_speed
-            elif event.key == pygame.K_d:
+                walk_time = get_length(walk_sound)
                 player.last_dir = "right"
                 self.velocity_x = hero_speed
             elif event.key == pygame.K_SPACE:
@@ -240,15 +238,29 @@ class MoveState:
                 return IdleState()
 
     def update(self, player, dt, platforms):
+        global walk_time, slide_time
+
         # Воспроизводим звуки ходьбы
         if player.onGround and player.sounds:
-            play_sound(walk_sound)
+            if walk_time >= get_length(walk_sound):
+                play_sound(walk_sound)
+                walk_time = 0
+            else:
+                walk_time += dt
 
         # Если персонаж находится на стене и двигается в ее сторону, он начинает скользить
         if player.onWall and not player.onGround:
             if player.wall_pos == player.last_dir:
                 player.isSliding = True
+
+                if player.sounds:
+                    if slide_time >= get_length(sliding_sound):
+                        play_sound(sliding_sound)
+                        slide_time = 0
+                    else:
+                        slide_time += dt
             else:
+                stop_sound()
                 player.isSliding = True
                 
                 if not player.falling:
@@ -274,12 +286,6 @@ class IdleState:
             elif event.key == pygame.K_RIGHT:
                 player.last_dir = "right"
                 return MoveState(hero_speed)
-            elif event.key == pygame.K_a:
-                player.last_dir = "left"
-                return MoveState(-hero_speed)
-            elif event.key == pygame.K_d:
-                player.last_dir = "right"
-                return MoveState(hero_speed, player)
             elif event.key == pygame.K_LSHIFT and player.last_dir:
                 return DashState(dash_speed, player.state, player)
             elif event.key == pygame.K_SPACE:
@@ -291,5 +297,6 @@ class IdleState:
                 return JumpState(jump_force, player.state)
 
     def update(self, player, dt, platforms):
+        stop_sound()
         player.gravitation()
         player.collide(0, player.vel.y, platforms)

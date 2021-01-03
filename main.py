@@ -2,7 +2,8 @@ import pygame
 import os
 import configparser
 import json
-from platforms import FloorPlatform, WallPlatform, MovingPlatform
+from platforms import *
+from enemies import *
 from hero import Hero
 from playerStates import IdleState
 from helpers import *
@@ -66,7 +67,10 @@ def main_menu():
     click = False
 
     # Инициализация кнопок меню
-    button_start = Button(screen, 500, 300, 280, 65, "Start Game", font)
+    if not saves:
+        button_start = Button(screen, 500, 300, 280, 65, "Start Game", font)
+    else:
+        button_start = Button(screen, 500, 300, 280, 65, "Continue", font)
     button_options = Button(screen, 500, 430, 280, 65, "Options", font)
     button_exit = Button(screen, 500, 560, 280, 65, "Exit", font)
 
@@ -111,6 +115,7 @@ def main_menu():
 def pause_menu():
     global saves
 
+    stop_sound()
     # Затенение фона
     background = pygame.Surface((width, height), pygame.SRCALPHA, 32)
     background.fill((96, 0, 159, 50))
@@ -325,19 +330,19 @@ def end_screen():
 # Прорисовка карты уровня
 level = [
     "###########################",
-    "#                  #      #",
-    "#                  #      #",
-    "#           #      #      #",
-    "#                  #      #",
-    "#                  #      #",
-    "#       <<<<<      #      #",
-    "#                  #      #",
-    "#                  #      #",
-    "#                  #      #",
-    "#        >>>       #      #",
-    "#                  #      #",
-    "#                         #",
-    "#                         #",
+    "#                        #",
+    "#                        #",
+    "#                        #",
+    "#                   1    #",
+    "#                        #",
+    "#                        #",
+    "#                        #",
+    "#                        #",
+    "#                        #",
+    "#     !                  #",
+    "#                        #",
+    "#           ?       _____#",
+    "#                        #",
     "___________________________"]
 
 
@@ -359,6 +364,16 @@ def render(level):
             elif col == "<":
                 pf = MovingPlatform(x, y, platform_sprites, "<")
                 platforms.append(pf)
+            elif col == "!":
+                en = SlowWalkEnemy(x, y, enemies_sprites)
+                enemies.append(en)
+            elif col == "?":
+                en = FastWalkEnemy(x, y, enemies_sprites)
+                enemies.append(en)
+            elif col == "1":
+                en = JumpEnemy(x, y, enemies_sprites)
+                enemies.append(en)
+
 
             x += pf.width
         y += pf.height
@@ -367,6 +382,9 @@ def render(level):
 
 platform_sprites = pygame.sprite.Group()
 platforms = []  # объекты, с которыми будет происходить взаимодействие
+
+enemies_sprites = pygame.sprite.Group()
+enemies = []
 
 hero_sprites = pygame.sprite.Group()
 hero = Hero((start_x, start_y), hero_sprites)
@@ -404,6 +422,9 @@ def game():
 
         platform_sprites.update()
         platform_sprites.draw(screen)
+
+        enemies_sprites.update(dt, platforms, hero_sprites)
+        enemies_sprites.draw(screen)
 
         hero_sprites.update(dt, platforms)
         hero_sprites.draw(screen)

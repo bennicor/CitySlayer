@@ -30,6 +30,9 @@ def quit_game():
     pygame.quit()
     sys.exit()
 
+def restart():
+    pass
+
 def save_game(hero, music, sounds, adult_content):
     saves = [hero.rect.x, hero.rect.y, music, sounds, adult_content]
 
@@ -42,7 +45,7 @@ def load_game():
 
     return saves
 
-pygame.mixer.init()
+pygame.mixer.init(buffer=2048)
 def load_music(file):
     pygame.mixer.music.load(file)
     pygame.mixer.music.set_volume(0.05)
@@ -60,4 +63,11 @@ def load_sound(file):
     return pygame.mixer.Sound(file)
 
 def play_sound(sound):
+    pygame.mixer.stop()
     pygame.mixer.Sound.play(sound)
+
+def get_length(sound):
+    return pygame.mixer.Sound.get_length(sound)
+
+def stop_sound():
+    pygame.mixer.stop()

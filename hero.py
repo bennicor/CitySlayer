@@ -24,6 +24,7 @@ class Hero(pygame.sprite.Sprite):
         self.gravity = gravity
         self.end = False
         self.onGround = False
+
         self.sounds = True
 
         # Инициализация sliding
@@ -103,7 +104,7 @@ class Hero(pygame.sprite.Sprite):
         self.onGround = False
         
         if hits: # если есть пересечение платформы с игрокоместь
-            if isinstance(hits[0], MovingPlatform):    # Если  пересечение с двигающейся платформой, персонаж двигается вместе с ней
+            if isinstance(hits[0], MovingPlatform):   # Если  пересечение с двигающейся платформой, персонаж двигается вместе с ней
                 self.rect.x += hits[0].x
 
             if yvel > 0:
