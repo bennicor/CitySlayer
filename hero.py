@@ -10,7 +10,8 @@ config.read("settings.ini")
 
 gravity = config.getfloat('PLAYER', 'gravity')
 sliding_speed = config.getfloat('PLAYER', 'sliding_speed')
-
+width = config.getint("PLAYER", "width")
+height = config.getint("PLAYER", "height")
 
 # Класс персонажа
 class Hero(pygame.sprite.Sprite):
@@ -18,8 +19,8 @@ class Hero(pygame.sprite.Sprite):
         super().__init__(group)
         self.vel = Vector2(0, 0)
         self.pos = Vector2(pos)
-        self.width = 30
-        self.height = 50
+        self.width = width
+        self.height = height
         self.gravity = gravity
         self.end = False
         self.onGround = False
