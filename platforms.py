@@ -1,4 +1,5 @@
 import pygame
+from pygame.math import Vector2
 from random import randrange
 import os
 
@@ -54,28 +55,53 @@ class MovingPlatform(FloorPlatform):
     def __init__(self, x, y, group, dir):
         super().__init__(x, y, group)
         self.color = pygame.Color("red")
-        
-        self.dir = dir
+
         self.counter = 0
-        self.x = 2 if self.dir == ">" else -2
-        self.y = 3 if self.dir == "^" else 0
+        self.x = 2 if dir == ">" else -2
 
         self.image = pygame.Surface((self.width, self.height))
         self.image.fill(self.color)
         self.rect = pygame.Rect(x, y, self.width, self.height)
 
-    # Перемещение платформы на промежутке
+    # Перемещение платформы на заданном промежутке
     def update(self):
-        if self.dir == "^":
-            if abs(self.counter) >= 100:
-                self.y = -self.y
+        if abs(self.counter) >= 200:
+            self.x = -self.x
 
-            self.rect = self.rect.move(0, self.y)
-            self.counter += self.y
-        else:
-            
-            if abs(self.counter) >= 200:
-                self.x = -self.x
+        self.rect = self.rect.move(self.x, 0)
+        self.counter += self.x
 
-            self.rect = self.rect.move(self.x, 0)
-            self.counter += self.x
+
+class FallingPlatform(FloorPlatform):
+    def __init__(self, x, y, group):
+        super().__init__(x, y, group)
+
+        self.vel = Vector2(0, 0)
+        self.gravity = 1.5
+        self.falling = False
+
+        self.image = pygame.Surface((self.width, self.height))
+        self.image.fill(pygame.Color("red"))
+        self.rect = pygame.Rect(x, y, self.width, self.height)
+
+    def update(self):
+        if self.falling:
+            if self.vel.y <= 12.5:
+                self.vel.y += self.gravity
+
+            self.rect = self.rect.move(self.vel.x, self.vel.y)
+
+class DeadlyPlatform(FloorPlatform):
+    def __init__(self, x, y, group):
+        super().__init__(x, y, group)
+
+        self.image = pygame.Surface((self.width, self.height))
+        self.image.fill(pygame.Color('#838B8B'))
+        self.rect = pygame.Rect(x, y, self.width, self.height)
+
+class ShimmeringPlatform(FloorPlatform):
+    def __init__(self, x, y, group):
+        super().__init__(x, y, group)
+
+
+
