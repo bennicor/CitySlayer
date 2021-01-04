@@ -2,13 +2,12 @@ import pygame
 import os
 import configparser
 import json
-from platforms import *
-from enemies import *
 from hero import Hero
 from playerStates import IdleState
 from helpers import *
 from gui_elements.checkbox import Checkbox
 from gui_elements.buttons import Button
+from camera import Camera
 
 
 pygame.init()
@@ -17,8 +16,7 @@ pygame.init()
 config = configparser.ConfigParser()
 config.read("settings.ini")
 
-width = config.getint('MAIN', 'width')
-height = config.getint('MAIN', 'height')
+width, height = json.loads(config.get("MAIN", "res"))
 
 size = width, height
 screen = pygame.display.set_mode(size)
@@ -55,8 +53,7 @@ def menu_setup(background, title):
     screen.blit(background, (0, 0))
     background = screen.copy()
 
-    render_text(title, pause_font, pygame.Color(
-        "#c2c1bf"), screen, width // 2, height * 0.2)
+    render_text(title, pause_font, pygame.Color("#c2c1bf"), screen, width // 2, height * 0.2)
     pygame.display.flip()
 
     return background
@@ -346,49 +343,12 @@ level = [
     "___________________________"]
 
 
-# Выводим на экран все платформы на уровне
-def render(level):
-    x = y = 0
-
-    for row in level:
-        for col in row:
-            if col == "_":
-                pf = FloorPlatform(x, y, platform_sprites)
-                platforms.append(pf)
-            elif col == "#":
-                pf = WallPlatform(x, y, platform_sprites)
-                platforms.append(pf)
-            elif col == ">":
-                pf = MovingPlatform(x, y, platform_sprites, ">")
-                platforms.append(pf)
-            elif col == "<":
-                pf = MovingPlatform(x, y, platform_sprites, "<")
-                platforms.append(pf)
-            elif col == "!":
-                en = SlowWalkEnemy(x, y, enemies_sprites)
-                enemies.append(en)
-            elif col == "?":
-                en = FastWalkEnemy(x, y, enemies_sprites)
-                enemies.append(en)
-            elif col == "1":
-                en = JumpEnemy(x, y, enemies_sprites)
-                enemies.append(en)
-
-
-            x += pf.width
-        y += pf.height
-        x = 0
-
-
-platform_sprites = pygame.sprite.Group()
-platforms = []  # объекты, с которыми будет происходить взаимодействие
-
-enemies_sprites = pygame.sprite.Group()
-enemies = []
 
 hero_sprites = pygame.sprite.Group()
-hero = Hero((start_x, start_y), hero_sprites)
-render(level)
+hero = Hero((500, 100), hero_sprites)
+
+# Выводим на экран все платформы на уровне
+render(load_level('level.txt'))
 
 
 def game():
@@ -431,10 +391,6 @@ def game():
 
         if hero.end:
             end_screen()
-
-        dt = clock.tick(fps) / 1000
-        pygame.display.flip()
-
 
 if __name__ == "__main__":
     main_menu()

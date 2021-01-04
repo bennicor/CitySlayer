@@ -1,5 +1,7 @@
 import pygame
 import configparser
+import json
+import time
 from pygame.math import Vector2
 from playerStates import IdleState
 from platforms import *
@@ -10,8 +12,9 @@ config.read("settings.ini")
 
 gravity = config.getfloat('PLAYER', 'gravity')
 sliding_speed = config.getfloat('PLAYER', 'sliding_speed')
-width = config.getint("PLAYER", "width")
-height = config.getint("PLAYER", "height")
+width, height = json.loads(config.get("MAIN", "res"))
+start_x, start_y = json.loads(config.get("MAIN", "start_pos"))
+
 
 # Класс персонажа
 class Hero(pygame.sprite.Sprite):
@@ -99,24 +102,33 @@ class Hero(pygame.sprite.Sprite):
 
         self.rect.y += self.vel.y
 
+    def die(self):
+        time.sleep(2)
+        self.rect.x = start_x
+        self.rect.y = start_y
+
     def collide(self, xvel, yvel, platforms):
         hits = pygame.sprite.spritecollide(self, platforms, False)
         self.onGround = False
         
-        if hits: # если есть пересечение платформы с игрокоместь
-            if isinstance(hits[0], MovingPlatform):   # Если  пересечение с двигающейся платформой, персонаж двигается вместе с ней
+        if hits: # если есть пересечение платформы с игроком
+            if isinstance(hits[0], MovingPlatform):    # Если есть пересечение с двигающейся платформой, персонаж двигается вместе с ней
                 self.rect.x += hits[0].x
+            
+            if isinstance(hits[0], FallingPlatform):
+                hits[0].falling = True
+
+            if isinstance(hits[0], DeadlyPlatform):
+                self.die()
 
             if yvel > 0:
                 self.rect.bottom = hits[0].rect.top
                 self.onGround = True
                 self.vel.y = 0
-            
-            if yvel < 0:
+            elif yvel < 0:
                 self.rect.top = hits[0].rect.bottom
                 self.vel.y = 0
-            
-            if xvel > 0:
+            elif xvel > 0:
                 if not self.onGround and hits[0].can_wall_jump:
                     self.onWall = True
                     self.wall_pos = "right"
@@ -126,8 +138,7 @@ class Hero(pygame.sprite.Sprite):
                         self.touched_wall = True
 
                 self.rect.right = hits[0].rect.left
-            
-            if xvel < 0:
+            elif xvel < 0:
                 if not self.onGround and hits[0].can_wall_jump:
                     self.onWall = True
                     self.wall_pos = "left"

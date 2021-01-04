@@ -138,8 +138,8 @@ class DoubleJumpState(JumpState):
 
 class WallJumpState:
     def __init__(self, velocity_x, velocity_y, next_state):
-        self.velocity_y = int(velocity_y)
-        self.velocity_x = int(velocity_x)
+        self.velocity_y = velocity_y
+        self.velocity_x = velocity_x
         self.next_state = next_state
 
     def handle_event(self, player, event):
