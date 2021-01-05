@@ -1,7 +1,7 @@
 import pygame
 import configparser
+import json
 from random import choice
-from helpers import restart
 
 
 config = configparser.ConfigParser()
@@ -41,9 +41,9 @@ class BaseEnemy(pygame.sprite.Sprite):
 
         self.rect.y += self.vel_y
     
-    def collide(self, x_vel, y_vel, platforms, hero):
+    def collide(self, x_vel, y_vel, platforms, hero_group, hero):
         hits = pygame.sprite.spritecollide(self, platforms, False)
-        hero_death = pygame.sprite.spritecollide(self, hero, False)
+        hero_death = pygame.sprite.spritecollide(self, hero_group, False)
 
         if hits:
             if y_vel > 0:
@@ -62,9 +62,9 @@ class BaseEnemy(pygame.sprite.Sprite):
                 self.rect.left = hits[0].rect.right
     
         if hero_death:
-            restart()
+            hero.respawn()
 
-    def update(self, platforms, hero):
+    def update(self, dt, platforms, hero_group, hero):
         pass
 
 
@@ -75,15 +75,15 @@ class SlowWalkEnemy(BaseEnemy):
         self.range = range
         self.counter =  0
 
-    def update(self, dt, platforms, hero):
+    def update(self, dt, platforms, hero_group, hero):
         self.gravitation()
-        self.collide(0, self.vel_y, platforms, hero)
+        self.collide(0, self.vel_y, platforms, hero_group, hero)
 
         if abs(self.counter) >= self.range:
             self.speed = -self.speed
 
         self.rect = self.rect.move(self.speed, 0)
-        self.collide(self.speed, 0, platforms, hero)
+        self.collide(self.speed, 0, platforms, hero_group, hero)
         self.counter += self.speed
 
 
@@ -102,15 +102,15 @@ class FastWalkEnemy(BaseEnemy):
         self.image.fill(self.color)
         self.rect = pygame.Rect(x, y, self.width, self.height)
 
-    def update(self, dt, platforms, hero):
+    def update(self, dt, platforms, hero_group, hero):
         self.gravitation()
-        self.collide(0, self.vel_y, platforms, hero)
+        self.collide(0, self.vel_y, platforms, hero_group, hero)
 
         if abs(self.counter) >= self.range:
             self.speed = -self.speed
 
         self.rect = self.rect.move(self.speed, 0)
-        self.collide(self.speed, 0, platforms, hero)
+        self.collide(self.speed, 0, platforms, hero_group, hero)
         self.counter += self.speed
 
 
@@ -129,7 +129,7 @@ class JumpEnemy(BaseEnemy):
         self.image.fill(self.color)
         self.rect = pygame.Rect(x, y, self.width, self.height)
 
-    def update(self, dt, platforms, hero):
+    def update(self, dt, platforms, hero_group, hero):
         global jump_cd
 
         if self.onGround and not self.jump_done:
@@ -147,8 +147,8 @@ class JumpEnemy(BaseEnemy):
                 self.jump_done = False
 
         self.gravitation()
-        self.collide(0, self.vel_y, platforms, hero)
+        self.collide(0, self.vel_y, platforms, hero_group, hero)
 
         if not self.onGround:
             self.rect = self.rect.move(self.speed, 0)
-        self.collide(self.speed, 0, platforms, hero)
+        self.collide(self.speed, 0, platforms, hero_group, hero)

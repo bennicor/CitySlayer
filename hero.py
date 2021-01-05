@@ -5,6 +5,7 @@ import time
 from pygame.math import Vector2
 from playerStates import IdleState
 from platforms import *
+from helpers import load_sound, play_sound, stop_sound
 
 
 config = configparser.ConfigParser()
@@ -12,9 +13,12 @@ config.read("settings.ini")
 
 gravity = config.getfloat('PLAYER', 'gravity')
 sliding_speed = config.getfloat('PLAYER', 'sliding_speed')
-width, height = json.loads(config.get("MAIN", "res"))
-start_x, start_y = json.loads(config.get("MAIN", "start_pos"))
+width, height = json.loads(config.get("PLAYER", "size"))
+death = config.getint("PLAYER", "death")
+start_x, start_y = json.loads(config.get("MAIN", "spawn_pos"))
 
+death_sound = load_sound("data/sounds/death.wav")
+death_sound.set_volume(0.3)
 
 # Класс персонажа
 class Hero(pygame.sprite.Sprite):
@@ -25,8 +29,8 @@ class Hero(pygame.sprite.Sprite):
         self.width = width
         self.height = height
         self.gravity = gravity
-        self.end = False
         self.onGround = False
+        self.end = False
 
         self.sounds = True
 
@@ -56,6 +60,14 @@ class Hero(pygame.sprite.Sprite):
         self.image = pygame.Surface((self.width, self.height))
         self.image.fill(pygame.Color("green"))
         self.rect = pygame.Rect(self.pos.x, self.pos.y, self.width, self.height)
+
+    def respawn(self):
+        if self.sounds:
+            play_sound(death_sound)
+
+        time.sleep(death)
+        self.rect.x = start_x
+        self.rect.y = start_y
 
     def dash_cooldown(self, dt):
         self.dash_timer -= dt
@@ -102,33 +114,32 @@ class Hero(pygame.sprite.Sprite):
 
         self.rect.y += self.vel.y
 
-    def die(self):
-        time.sleep(2)
-        self.rect.x = start_x
-        self.rect.y = start_y
-
     def collide(self, xvel, yvel, platforms):
         hits = pygame.sprite.spritecollide(self, platforms, False)
         self.onGround = False
         
         if hits: # если есть пересечение платформы с игроком
-            if isinstance(hits[0], MovingPlatform):    # Если есть пересечение с двигающейся платформой, персонаж двигается вместе с ней
-                self.rect.x += hits[0].x
-            
-            if isinstance(hits[0], FallingPlatform):
-                hits[0].falling = True
-
-            if isinstance(hits[0], DeadlyPlatform):
-                self.die()
-
             if yvel > 0:
                 self.rect.bottom = hits[0].rect.top
                 self.onGround = True
                 self.vel.y = 0
+            
+                # Если персонаж приземлился на платформу 
+                if isinstance(hits[0], MovingPlatform):    # Если есть пересечение с двигающейся платформой, персонаж двигается вместе с ней
+                    self.rect.x += hits[0].vel_x
+                
+                if isinstance(hits[0], FallingPlatform):
+                    hits[0].falling = True
+                
+                if isinstance(hits[0], DeadlyPlatform):
+                    self.respawn()
             elif yvel < 0:
                 self.rect.top = hits[0].rect.bottom
                 self.vel.y = 0
             elif xvel > 0:
+                if isinstance(hits[0], FallingPlatform) and abs(hits[0].rect.top - self.rect.bottom) <= 10:
+                    self.rect.bottom = hits[0].rect.top - 5
+
                 if not self.onGround and hits[0].can_wall_jump:
                     self.onWall = True
                     self.wall_pos = "right"
@@ -139,6 +150,9 @@ class Hero(pygame.sprite.Sprite):
 
                 self.rect.right = hits[0].rect.left
             elif xvel < 0:
+                if isinstance(hits[0], FallingPlatform) and abs(hits[0].rect.top - self.rect.bottom) <= 5:
+                    self.rect.bottom = hits[0].rect.top - 5
+
                 if not self.onGround and hits[0].can_wall_jump:
                     self.onWall = True
                     self.wall_pos = "left"

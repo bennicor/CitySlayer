@@ -5,9 +5,10 @@ import json
 from hero import Hero
 from playerStates import IdleState
 from helpers import *
+from platforms import *
+from enemies import *
 from gui_elements.checkbox import Checkbox
 from gui_elements.buttons import Button
-from camera import Camera
 
 
 pygame.init()
@@ -27,7 +28,7 @@ if os.path.exists("saves.txt"):
     saves = True
 else:
     saves = False
-    start_x, start_y = json.loads(config.get("MAIN", "start_pos"))
+    start_x, start_y = json.loads(config.get("MAIN", "cur_pos"))
     music = config.getboolean("MAIN", "music")
     sounds = config.getboolean("MAIN", "sounds")
     adult_content = config.getboolean("MAIN", "adult_content")
@@ -85,8 +86,7 @@ def main_menu():
         button_exit.update((x, y))
 
         # Отрисовка текста
-        render_text("Game Title", title_font, pygame.Color(
-            "#c2c1bf"), screen, width // 2, height // 4)
+        render_text("City Slasher", title_font, pygame.Color("#c2c1bf"), screen, width // 2, height // 4)
 
         # Проверяем нажатие на кнопки
         if button_start.collide((x, y)) and click:
@@ -324,31 +324,54 @@ def end_screen():
 
         pygame.display.flip()
 
-# Прорисовка карты уровня
-level = [
-    "###########################",
-    "#                         #",
-    "#                         #",
-    "#                         #",
-    "#                   1     #",
-    "#                         #",
-    "#                         #",
-    "#                         #",
-    "#                         #",
-    "#                         #",
-    "#     !                   #",
-    "#                         #",
-    "#           ?       ______#",
-    "#                         #",
-    "___________________________"]
+def render(level):
+    x = y = 0
+    for row in level:
+        for col in row:
+            if col == "_":
+                pf = FloorPlatform(x, y, platform_sprites)
+                platforms.append(pf)
+            elif col == "|":
+                pf = WallPlatform(x, y, platform_sprites)
+                platforms.append(pf)
+            elif col == ">":
+                pf = MovingPlatform(x, y, platform_sprites, ">")
+                platforms.append(pf)
+            elif col == "<":
+                pf = MovingPlatform(x, y, platform_sprites, "<")
+                platforms.append(pf)
+            elif col == "S":
+                en = SlowWalkEnemy(x, y, enemies_sprites)
+                enemies.append(en)
+            elif col == "F":
+                en = FastWalkEnemy(x, y, enemies_sprites)
+                enemies.append(en)
+            elif col == "J":
+                en = JumpEnemy(x, y, enemies_sprites)
+                enemies.append(en)
+            elif col == "=":
+                pf = FallingPlatform(x, y, platform_sprites)
+                platforms.append(pf)
+            elif col == "^":
+                pf = DeadlyPlatform(x, y, platform_sprites)
+                platforms.append(pf)
+    
+            x += pf.width
+        y += pf.height
+        x = 0
 
+# Инициализация групп
+platform_sprites = pygame.sprite.Group()
+platforms = []  # объекты, с которыми будет происходить взаимодействие
 
+enemies_sprites = pygame.sprite.Group()
+enemies = []
 
 hero_sprites = pygame.sprite.Group()
-hero = Hero((500, 100), hero_sprites)
+hero = Hero((start_x, start_y), hero_sprites)
 
-# Выводим на экран все платформы на уровне
-render(load_level('level.txt'))
+# Выводим на экран все обьекты на уровня
+render(load_level("level.txt"))
 
 
 def game():
@@ -363,9 +386,9 @@ def game():
     if not saves:
         tutorial()
     
-    pygame.mouse.set_visible(False)
 
     while running:
+        pygame.mouse.set_visible(False)
         # Отключаем звуки
         if not sounds:
             hero.sounds = False
@@ -383,7 +406,7 @@ def game():
         platform_sprites.update()
         platform_sprites.draw(screen)
 
-        enemies_sprites.update(dt, platforms, hero_sprites)
+        enemies_sprites.update(dt, platforms, hero_sprites, hero)
         enemies_sprites.draw(screen)
 
         hero_sprites.update(dt, platforms)
@@ -391,6 +414,9 @@ def game():
 
         if hero.end:
             end_screen()
+
+        dt = clock.tick(fps) / 1000
+        pygame.display.flip()
 
 if __name__ == "__main__":
     main_menu()

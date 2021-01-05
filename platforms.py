@@ -11,7 +11,7 @@ config.read("settings.ini")
 
 width = config.getint('PLATFORM', 'height')
 height = config.getint('PLATFORM', 'height')
-
+gravity = config.getfloat('PLATFORM', 'gravity')
 
 floor = [load_image('data/sprite_down/sprite_down_1.png', width, height),
          load_image('data/sprite_down/sprite_down_2.png', width, height),
@@ -26,13 +26,13 @@ class FloorPlatform(pygame.sprite.Sprite):
         self.width = width
         self.height = height
         self.can_wall_jump = False
+        self.vel_y = self.vel_x = 0
 
         self.image = floor[randrange(3)]
         self.rect = pygame.Rect(x, y, self.width, self.height)
 
     def update(self):
         pass
-
 
 # Стена
 class WallPlatform(FloorPlatform):
@@ -45,7 +45,6 @@ class WallPlatform(FloorPlatform):
         self.image.fill(self.color)
         self.rect = pygame.Rect(x, y, self.width, self.height)
 
-
 # Двигающаяся платформа
 class MovingPlatform(FloorPlatform):
     def __init__(self, x, y, group, dir):
@@ -53,7 +52,7 @@ class MovingPlatform(FloorPlatform):
         self.color = pygame.Color("red")
 
         self.counter = 0
-        self.x = 2 if dir == ">" else -2
+        self.vel_x = 2 if dir == ">" else -2
 
         self.image = pygame.Surface((self.width, self.height))
         self.image.fill(self.color)
@@ -62,18 +61,17 @@ class MovingPlatform(FloorPlatform):
     # Перемещение платформы на заданном промежутке
     def update(self):
         if abs(self.counter) >= 200:
-            self.x = -self.x
+            self.vel_x = -self.vel_x
 
-        self.rect = self.rect.move(self.x, 0)
-        self.counter += self.x
+        self.rect = self.rect.move(self.vel_x, 0)
+        self.counter += self.vel_x
 
-
+# Падающая платформа
 class FallingPlatform(FloorPlatform):
     def __init__(self, x, y, group):
         super().__init__(x, y, group)
 
-        self.vel = Vector2(0, 0)
-        self.gravity = 1.5
+        self.gravity = gravity
         self.falling = False
 
         self.image = pygame.Surface((self.width, self.height))
@@ -82,16 +80,16 @@ class FallingPlatform(FloorPlatform):
 
     def update(self):
         if self.falling:
-            if self.vel.y <= 12.5:
-                self.vel.y += self.gravity
+            if self.vel_y <= 12.5:
+                self.vel_y += self.gravity
 
-            self.rect = self.rect.move(self.vel.x, self.vel.y)
+            self.rect = self.rect.move(0, self.vel_y)
 
-
+# Смертельная платформа
 class DeadlyPlatform(FloorPlatform):
     def __init__(self, x, y, group):
         super().__init__(x, y, group)
 
         self.image = pygame.Surface((self.width, self.height))
-        self.image.fill(pygame.Color('#838B8B'))
+        self.image.fill(pygame.Color('gray'))
         self.rect = pygame.Rect(x, y, self.width, self.height)

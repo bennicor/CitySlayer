@@ -2,16 +2,6 @@ import pygame
 import sys
 import pickle
 import os
-from platforms import *
-from enemies import *
-
-
-# Инициализация групп
-platform_sprites = pygame.sprite.Group()
-platforms = []  # объекты, с которыми будет происходить взаимодействие
-
-enemies_sprites = pygame.sprite.Group()
-enemies = []
 
 
 def load_image(name, width, height, color_keys=None):
@@ -31,41 +21,6 @@ def load_level(filename):
     max_width = max(map(len, level_map))
     return list(map(lambda x: x.ljust(max_width, ' '), level_map))
 
-def render(level):
-    x = y = 0
-    for row in level:
-        for col in row:
-            if col == "_":
-                pf = FloorPlatform(x, y, platform_sprites)
-                platforms.append(pf)
-            elif col == "#":
-                pf = WallPlatform(x, y, platform_sprites)
-                platforms.append(pf)
-            elif col == ">":
-                pf = MovingPlatform(x, y, platform_sprites, ">")
-                platforms.append(pf)
-            elif col == "<":
-                pf = MovingPlatform(x, y, platform_sprites, "<")
-                platforms.append(pf)
-            elif col == "!":
-                en = SlowWalkEnemy(x, y, enemies_sprites)
-                enemies.append(en)
-            elif col == "?":
-                en = FastWalkEnemy(x, y, enemies_sprites)
-                enemies.append(en)
-            elif col == "1":
-                en = JumpEnemy(x, y, enemies_sprites)
-                enemies.append(en)
-            elif col == "=":
-                pf = FallingPlatform(x, y, platform_sprites)
-                platforms.append(pf)
-            elif col == "^":
-                pf = DeadlyPlatform(x, y, platform_sprites)
-                platforms.append(pf)
-            x += pf.width
-        y += pf.height
-        x = 0
-
 def render_text(text, font, color, surface, x, y, align="center"):
     text = font.render(text, 1, color)
     text_rect = text.get_rect()
@@ -80,9 +35,6 @@ def render_text(text, font, color, surface, x, y, align="center"):
 def quit_game():
     pygame.quit()
     sys.exit()
-
-def restart():
-    pass
 
 def save_game(hero, music, sounds, adult_content):
     saves = [hero.rect.x, hero.rect.y, music, sounds, adult_content]
