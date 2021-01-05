@@ -1,4 +1,5 @@
 import pygame
+from pygame.math import Vector2
 from random import randrange
 import os
 
@@ -69,3 +70,38 @@ class MovingPlatform(FloorPlatform):
 
         self.rect = self.rect.move(self.x, 0)
         self.counter += self.x
+
+
+class FallingPlatform(FloorPlatform):
+    def __init__(self, x, y, group):
+        super().__init__(x, y, group)
+
+        self.vel = Vector2(0, 0)
+        self.gravity = 1.5
+        self.falling = False
+
+        self.image = pygame.Surface((self.width, self.height))
+        self.image.fill(pygame.Color("red"))
+        self.rect = pygame.Rect(x, y, self.width, self.height)
+
+    def update(self):
+        if self.falling:
+            if self.vel.y <= 12.5:
+                self.vel.y += self.gravity
+
+            self.rect = self.rect.move(self.vel.x, self.vel.y)
+
+class DeadlyPlatform(FloorPlatform):
+    def __init__(self, x, y, group):
+        super().__init__(x, y, group)
+
+        self.image = pygame.Surface((self.width, self.height))
+        self.image.fill(pygame.Color('#838B8B'))
+        self.rect = pygame.Rect(x, y, self.width, self.height)
+
+class ShimmeringPlatform(FloorPlatform):
+    def __init__(self, x, y, group):
+        super().__init__(x, y, group)
+
+
+

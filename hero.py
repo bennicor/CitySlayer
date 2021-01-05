@@ -5,7 +5,6 @@ from platforms import *
 
 WIDTH, HEIGHT = 1280, 720
 GRAVITY = 1.5
-SLIDING_SPEED = .1
 
 
 # Класс персонажа
@@ -24,8 +23,7 @@ class Hero(pygame.sprite.Sprite):
         self.onWall = False
         self.wall_pos = ""
         self.isSliding = False
-        self.wall_first_touch = True
-        self.sliding_timer = .7
+        self.sliding_timer = 1
         self.falling = False
         self.touched_wall = False
 
@@ -57,14 +55,11 @@ class Hero(pygame.sprite.Sprite):
     def sliding(self, dt):
         self.sliding_timer -= dt
 
-        if self.wall_first_touch:
-            self.vel.y = 0
-            self.gravity = SLIDING_SPEED
-            self.wall_first_touch = False
+        self.vel.y = 0
+        self.gravity = 0
 
         if self.sliding_timer <= 0:
             self.falling = True
-            self.wall_first_touch = True
 
     def wall_jump_cd(self, dt):
         self.wall_jump_timer -= dt
@@ -92,6 +87,11 @@ class Hero(pygame.sprite.Sprite):
 
         self.rect.y += self.vel.y
 
+    def die(self):
+        self.rect.x = 96
+        self.rect.y = 624
+
+
     def collide(self, xvel, yvel, platforms):
         hits = pygame.sprite.spritecollide(self, platforms, False)
         self.onGround = False
@@ -99,6 +99,12 @@ class Hero(pygame.sprite.Sprite):
         if hits: # если есть пересечение платформы с игроком
             if isinstance(hits[0], MovingPlatform):    # Если есть пересечение с двигающейся платформой, персонаж двигается вместе с ней
                 self.rect.x += hits[0].x
+
+            if isinstance(hits[0], FallingPlatform):# hits[0] = <FallingPlatform Sprite(in 1 groups)>
+                hits[0].falling = True
+
+            if isinstance(hits[0], DeadlyPlatform):
+                self.die()
 
             if yvel > 0:
                 self.rect.bottom = hits[0].rect.top
@@ -139,13 +145,12 @@ class Hero(pygame.sprite.Sprite):
     def update(self, dt, platforms):
         if self.onGround:
             self.onWall = False
-            self.sliding_timer = .7
+            self.sliding_timer = 1
             self.wall_jump_timer = .3
             self.falling = False
             self.double_jump = False
             self.wall_jump_done = False
             self.touched_wall = False
-            self.wall_first_touch = True
 
         self.isSliding = False
         self.state.update(self, dt, platforms)

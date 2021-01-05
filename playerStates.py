@@ -159,7 +159,7 @@ class WallJumpState:
             player.gravitation()
             player.collide(0, player.vel.y, platforms)
         
-            player.sliding_timer = .7
+            player.sliding_timer = 1
             player.timer_cd = .1
 
             player.wall_jump_done = True
@@ -168,7 +168,6 @@ class WallJumpState:
             player.falling = True
             player.touched_wall = False
             player.onWall = False
-            player.wall_first_touch = True
 
             player.state = self.next_state
         else:
@@ -225,7 +224,7 @@ class MoveState:
                 if not player.falling:
                     player.timer(dt)
 
-                player.sliding_timer = .7
+                player.sliding_timer = 1
 
         # Обновляем координаты персонажа и проверям на столкновения
         player.vel.x = self.velocity_x
@@ -261,6 +260,6 @@ class IdleState:
 
                 return JumpState(JUMP_FORCE, player.state)
 
-    def update(self, player, dt, platforms):
+    def update(self, player, dt, platforms):        
         player.gravitation()
         player.collide(0, player.vel.y, platforms)
