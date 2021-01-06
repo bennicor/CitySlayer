@@ -7,8 +7,8 @@ class Camera(object):
         self.true_scroll = self.scroll = [0, 0]
 
     def apply(self, target):
-        target.rect.x -= self.scroll[0] / 30
-        target.rect.y -= self.scroll[1] / 30
+        target.rect.x -= self.scroll[0] // 30
+        target.rect.y -= self.scroll[1] // 30
 
 
     def update(self, target):
