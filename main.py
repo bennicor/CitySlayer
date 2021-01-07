@@ -457,7 +457,7 @@ def game():
         enemies_sprites.update(dt, platforms, hero_sprites, hero)
         enemies_sprites.draw(screen)
 
-        hero_sprites.update(dt, platforms)
+        hero_sprites.update(dt, platforms, camera)
         hero_sprites.draw(screen)
 
         if hero.dead:

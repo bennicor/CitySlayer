@@ -13,6 +13,10 @@ jump_force = config.getfloat('PLAYER', 'jump_force')
 dash_speed = config.getint('PLAYER', 'dash_speed')
 wall_jump = json.loads(config.get("PLAYER", "wall_jump"))
 
+down_timer = config.getfloat("CAMERA", "down_timer")
+width, height = json.loads(config.get("MAIN", "res"))
+h_width, h_height = json.loads(config.get("PLAYER", "size"))
+
 # Загрузка звуков
 walk_sound = load_sound("data/sounds/walk.wav")
 walk_sound.set_volume(0.3)
@@ -50,7 +54,7 @@ class DashState:
             elif event.key == pygame.K_RIGHT:
                 self.next_state = IdleState()
 
-    def update(self, player, dt, platforms):
+    def update(self, player, dt, platforms, camera=None):
         global walk_time, slide_time
 
         if not player.dash_done: # В воздухе может быть выполнен только один рывок                
@@ -95,7 +99,7 @@ class JumpState:
             elif event.key == pygame.K_RIGHT:
                 self.next_state = IdleState()
 
-    def update(self, player, dt, platforms):
+    def update(self, player, dt, platforms, camera=None):
         global walk_time, slide_time
 
         walk_time = get_length(walk_sound)
@@ -118,7 +122,7 @@ class DoubleJumpState(JumpState):
     def __init__(self, velocity_y, next_state):
         super().__init__(velocity_y, next_state)
 
-    def update(self, player, dt, platforms):
+    def update(self, player, dt, platforms, camera=None):
         global walk_time, slide_time
 
         walk_time = get_length(walk_sound)
@@ -161,7 +165,7 @@ class WallJumpState:
             elif event.key == pygame.K_d:
                 self.next_state = IdleState()
 
-    def update(self, player, dt, platforms):
+    def update(self, player, dt, platforms, camera=None):
         global walk_time, slide_time
 
         # Игрок не может прыгать с большой скоростью
@@ -237,7 +241,7 @@ class MoveState:
             elif event.key == pygame.K_d and self.velocity_x > 0:
                 return IdleState()
 
-    def update(self, player, dt, platforms):
+    def update(self, player, dt, platforms, camera=None):
         global walk_time, slide_time
 
         # Воспроизводим звуки ходьбы
@@ -278,6 +282,9 @@ class MoveState:
 
 
 class IdleState:
+    def __init__(self):
+        self.timer = down_timer
+
     def handle_event(self, player, event):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
@@ -296,7 +303,19 @@ class IdleState:
 
                 return JumpState(jump_force, player.state)
 
-    def update(self, player, dt, platforms):
+    def update(self, player, dt, platforms, camera=None):
+        # Опускаем камеру при длительном нажатии клавиши
+        keys = pygame.key.get_pressed()
+
+        if keys[pygame.K_DOWN]:
+            self.timer -= dt
+
+            if self.timer <= 0:
+                camera.y_offset //=2
+        else:
+            self.timer = down_timer
+            camera.y_offset = height // 2 + h_height
+
         if player.onGround:
             stop_sound()
             

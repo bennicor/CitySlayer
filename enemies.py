@@ -2,6 +2,7 @@ import pygame
 import configparser
 import json
 from random import choice
+from platforms import DeadlyPlatform
 
 
 config = configparser.ConfigParser()
@@ -24,6 +25,7 @@ class BaseEnemy(pygame.sprite.Sprite):
         self.y = y
         self.width = width
         self.height = height
+        self.group = group
         self.color = pygame.Color("red")
         self.onGround = False
         
@@ -34,6 +36,9 @@ class BaseEnemy(pygame.sprite.Sprite):
         self.image = pygame.Surface((self.width, self.height))
         self.image.fill(self.color)
         self.rect = pygame.Rect(x, y, self.width, self.height)
+
+    def death(self):
+        self.group.remove(self)
 
     def gravitation(self):
         if self.vel_y <= 12.5:
@@ -46,6 +51,9 @@ class BaseEnemy(pygame.sprite.Sprite):
         hero_death = pygame.sprite.spritecollide(self, hero_group, False)
 
         if hits:
+            if isinstance(hits[0], DeadlyPlatform):
+                self.death()
+
             if y_vel > 0:
                 self.rect.bottom = hits[0].rect.top
                 self.onGround = True
@@ -62,7 +70,7 @@ class BaseEnemy(pygame.sprite.Sprite):
                 self.rect.left = hits[0].rect.right
     
         if hero_death:
-            hero.respawn()
+            hero.dead = True
 
     def update(self, dt, platforms, hero_group, hero):
         pass

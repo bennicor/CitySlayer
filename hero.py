@@ -151,12 +151,12 @@ class Hero(pygame.sprite.Sprite):
 
                 self.rect.left = hits[0].rect.right
 
-    def handle_event(self, event):
+    def handle_event(self, event, ):
         new_state = self.state.handle_event(self, event)
         # Провераяем, если новое состояние отлично от текущего
         self.state = new_state if new_state is not None else self.state
 
-    def update(self, dt, platforms):
+    def update(self, dt, platforms, camera=None):
         if self.onGround:
             self.onWall = False
             self.sliding_timer = .7
@@ -168,7 +168,7 @@ class Hero(pygame.sprite.Sprite):
             self.wall_first_touch = True
 
         self.isSliding = False
-        self.state.update(self, dt, platforms)
+        self.state.update(self, dt, platforms, camera)
             
         # Если персонаж коснулся земли, возобновляем возможность рывка
         if self.dash_done:
