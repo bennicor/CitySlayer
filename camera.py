@@ -3,7 +3,7 @@ import configparser
 import json
 
 config = configparser.ConfigParser()
-config.read("setting.ini")
+config.read("settings.ini")
 
 width, height = json.loads(config.get("MAIN", "res"))
 h_width, h_height = json.loads(config.get("PLAYER", "size"))

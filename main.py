@@ -2,6 +2,7 @@ import pygame
 import os
 import configparser
 import json
+import time
 from hero import Hero
 from camera import Camera
 from playerStates import IdleState
@@ -20,20 +21,23 @@ config.read("settings.ini")
 
 width, height = json.loads(config.get("MAIN", "res"))
 fps = config.getint("MAIN", "fps")
+start_x, start_y = json.loads(config.get("MAIN", "start_pos"))
+death = config.getint("PLAYER", "death")
+death_sound = load_sound("data/sounds/death.wav")
+death_sound.set_volume(0.3)
 
 size = width, height
 screen = pygame.display.set_mode(size)
 
 # Загружаем сохраненные данные, если они имеются
 if os.path.exists("saves.txt"):
-    start_x, start_y, music, sounds, adult_content = load_game()
+    music, sounds, adult_content = load_game()
     saves = True
 else:
-    saves = False
-    start_x, start_y = json.loads(config.get("MAIN", "cur_pos"))
     music = config.getboolean("MAIN", "music")
     sounds = config.getboolean("MAIN", "sounds")
     adult_content = config.getboolean("MAIN", "adult_content")
+    saves = False
 
 title_font = pygame.font.Font("data/fonts/pixel_font.ttf", 120)
 pause_font = pygame.font.Font("data/fonts/pixel_font.ttf", 80)
@@ -79,6 +83,9 @@ def main_menu():
         screen.fill(pygame.Color("black"))
         screen.blit(bg, (0, 0))
 
+        # Отрисовка текста
+        render_text("City Slayer", title_font, pygame.Color("#c2c1bf"), screen, width // 2, height // 4)
+
         # Координаты курсора
         x, y = pygame.mouse.get_pos()
 
@@ -86,9 +93,6 @@ def main_menu():
         button_start.update((x, y))
         button_options.update((x, y))
         button_exit.update((x, y))
-
-        # Отрисовка текста
-        render_text("City Slasher", title_font, pygame.Color("#c2c1bf"), screen, width // 2, height // 4)
 
         # Проверяем нажатие на кнопки
         if button_start.collide((x, y)) and click:
@@ -99,7 +103,7 @@ def main_menu():
 
         if button_exit.collide((x, y)) and click:
             # При выходе из игры сохраняемся
-            save_game(hero, music, sounds, adult_content)
+            save_game(music, sounds, adult_content)
             quit_game()
 
         click = False
@@ -149,7 +153,7 @@ def pause_menu():
         if button_exit.collide((x, y)) and click:
             # Сохраняемся при выходе из игры
             saves = True
-            save_game(hero, music, sounds, adult_content)
+            save_game(music, sounds, adult_content)
             main_menu()
 
         click = False
@@ -173,11 +177,14 @@ def options():
     background.fill((96, 0, 159, 50))
     background = menu_setup(background, "Options")
 
+    # Отрисовка текста
+    render_text("Music", font, pygame.Color("#c2c1bf"), screen, width // 3, height * 0.425)
+    render_text("Sounds", font, pygame.Color("#c2c1bf"), screen, width // 3, height * 0.625)
+    render_text("Adult Content", font, pygame.Color("#c2c1bf"), screen, width // 3, height * 0.825)
+
     checkbox_music = Checkbox(screen, width * 0.6, height * 0.4, checked=music)
-    checkbox_sounds = Checkbox(
-        screen, width * 0.6, height * 0.6, checked=sounds)
-    checkbox_adult = Checkbox(
-        screen, width * 0.6, height * 0.8, checked=adult_content)
+    checkbox_sounds = Checkbox(screen, width * 0.6, height * 0.6, checked=sounds)
+    checkbox_adult = Checkbox(screen, width * 0.6, height * 0.8, checked=adult_content)
 
     button_back = Button(screen, 20, 20, 75, 50, "<-", font)
 
@@ -192,14 +199,6 @@ def options():
         checkbox_sounds.update()
         checkbox_adult.update()
         button_back.update((x, y))
-
-        # Отрисовка текста
-        render_text("Music", font, pygame.Color("#c2c1bf"),
-                    screen, width // 3, height * 0.425)
-        render_text("Sounds", font, pygame.Color("#c2c1bf"),
-                    screen, width // 3, height * 0.625)
-        render_text("Adult Content", font, pygame.Color(
-            "#c2c1bf"), screen, width // 3, height * 0.825)
 
         click = False
         for event in pygame.event.get():
@@ -218,12 +217,12 @@ def options():
         if button_back.collide((x, y)) and click:
             running = False
 
+        # Отключаем музыку
         if not music:
             pause_music()
         else:
             unpause_music()
 
-        # Отключаем музыку
         if not checkbox_music.checked:
             music = False
         else:
@@ -326,7 +325,44 @@ def end_screen():
 
         pygame.display.flip()
 
-def render(level):
+def death_screen():
+    pygame.mouse.set_visible(False)
+    background = pygame.Surface((width, height), pygame.SRCALPHA, 32)
+    background.fill((96, 0, 159, 50))
+    background = menu_setup(background, "")
+
+    render_text("Loading", font, pygame.Color("#c2c1bf"), screen, width * 0.8, height * 0.8, align="left")
+    running = True
+
+    while running:
+        pygame.display.flip()
+        time.sleep(2)
+        running = False
+
+def respawn():
+    hero.rect.x = start_x
+    hero.rect.y = start_y
+
+def restart():
+    global saves
+
+    pause_music()
+    if sounds:
+        play_sound(death_sound)
+
+    time.sleep(death)
+    death_screen()
+    saves = True
+    hero.state = IdleState()
+    hero.dead = False
+    respawn()
+
+    if music:
+        unpause_music()
+
+    game()
+
+def render(level, platforms, platform_sprites, enemies, enemies_sprites):
     x = y = 0
     for row in level:
         for col in row:
@@ -362,19 +398,8 @@ def render(level):
         y += pf.height
         x = 0
 
-# Инициализация групп
-platform_sprites = pygame.sprite.Group()
-platforms = []  # объекты, с которыми будет происходить взаимодействие
-
-enemies_sprites = pygame.sprite.Group()
-enemies = []
-
 hero_sprites = pygame.sprite.Group()
 hero = Hero((start_x, start_y), hero_sprites)
-
-# Выводим на экран все обьекты на уровня
-render(load_level("level.txt"))
-
 
 def game():
     global saves, sounds
@@ -384,10 +409,22 @@ def game():
     dt = 0
     running = True
 
+    # Инициализация групп
+    platform_sprites = pygame.sprite.Group()
+    platforms = []  # объекты, с которыми будет происходить взаимодействие
+
+    enemies_sprites = pygame.sprite.Group()
+    enemies = []
+
+    # Перемещение героя
+    respawn()
+
+    # Выводим на экран все обьекты на уровня
+    render(load_level("level.txt"), platforms, platform_sprites, enemies, enemies_sprites)
+
     # Вызываем экран с обучением
     if not saves:
         tutorial()
-    
 
     while running:
         pygame.mouse.set_visible(False)
@@ -422,6 +459,9 @@ def game():
 
         hero_sprites.update(dt, platforms)
         hero_sprites.draw(screen)
+
+        if hero.dead:
+            restart()
 
         if hero.end:
             end_screen()

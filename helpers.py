@@ -36,8 +36,8 @@ def quit_game():
     pygame.quit()
     sys.exit()
 
-def save_game(hero, music, sounds, adult_content):
-    saves = [hero.rect.x, hero.rect.y, music, sounds, adult_content]
+def save_game(music, sounds, adult_content):
+    saves = [music, sounds, adult_content]
 
     with open("saves.txt", "wb") as f:
         pickle.dump(saves, f)

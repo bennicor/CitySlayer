@@ -14,11 +14,6 @@ config.read("settings.ini")
 gravity = config.getfloat('PLAYER', 'gravity')
 sliding_speed = config.getfloat('PLAYER', 'sliding_speed')
 width, height = json.loads(config.get("PLAYER", "size"))
-death = config.getint("PLAYER", "death")
-start_x, start_y = json.loads(config.get("MAIN", "spawn_pos"))
-
-death_sound = load_sound("data/sounds/death.wav")
-death_sound.set_volume(0.3)
 
 # Класс персонажа
 class Hero(pygame.sprite.Sprite):
@@ -33,6 +28,7 @@ class Hero(pygame.sprite.Sprite):
         self.end = False
 
         self.sounds = True
+        self.dead = False
 
         # Инициализация sliding
         self.onWall = False
@@ -60,14 +56,6 @@ class Hero(pygame.sprite.Sprite):
         self.image = pygame.Surface((self.width, self.height))
         self.image.fill(pygame.Color("green"))
         self.rect = pygame.Rect(self.pos.x, self.pos.y, self.width, self.height)
-
-    def respawn(self):
-        if self.sounds:
-            play_sound(death_sound)
-
-        time.sleep(death)
-        self.rect.x = start_x
-        self.rect.y = start_y
 
     def dash_cooldown(self, dt):
         self.dash_timer -= dt
@@ -119,6 +107,9 @@ class Hero(pygame.sprite.Sprite):
         self.onGround = False
         
         if hits: # если есть пересечение платформы с игроком
+            if isinstance(hits[0], DeadlyPlatform):
+                self.dead = True
+
             if yvel > 0:
                 self.rect.bottom = hits[0].rect.top
                 self.onGround = True
@@ -129,10 +120,7 @@ class Hero(pygame.sprite.Sprite):
                     self.rect.x += hits[0].vel_x
                 
                 if isinstance(hits[0], FallingPlatform):
-                    hits[0].falling = True
-                
-                if isinstance(hits[0], DeadlyPlatform):
-                    self.respawn()
+                    hits[0].falling = True                
             elif yvel < 0:
                 self.rect.top = hits[0].rect.bottom
                 self.vel.y = 0
