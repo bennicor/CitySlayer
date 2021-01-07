@@ -3,6 +3,7 @@ import os
 import configparser
 import json
 from hero import Hero
+from camera import Camera
 from playerStates import IdleState
 from helpers import *
 from platforms import *
@@ -18,6 +19,7 @@ config = configparser.ConfigParser()
 config.read("settings.ini")
 
 width, height = json.loads(config.get("MAIN", "res"))
+fps = config.getint("MAIN", "fps")
 
 size = width, height
 screen = pygame.display.set_mode(size)
@@ -377,8 +379,8 @@ render(load_level("level.txt"))
 def game():
     global saves, sounds
 
+    camera = Camera()
     clock = pygame.time.Clock()
-    fps = 60
     dt = 0
     running = True
 
@@ -402,6 +404,15 @@ def game():
                     pause_menu()
 
             hero.handle_event(event)
+
+        camera.update(hero)
+        camera.apply(hero)
+
+        for sprite in platform_sprites:
+            camera.apply(sprite)
+
+        for sprite in enemies_sprites:
+            camera.apply(sprite)
 
         platform_sprites.update()
         platform_sprites.draw(screen)
