@@ -17,6 +17,7 @@ floor = [load_image('data/sprite_down/sprite_down_1.png', width, height),
          load_image('data/sprite_down/sprite_down_2.png', width, height),
          load_image('data/sprite_down/sprite_down_3.png', width, height),
          load_image('data/sprite_down/sprite_down_4.png', width, height)]
+wall = load_image('data/sprite_wall/sprite_wall.png', width, height)
 
 
 # Пол
@@ -38,11 +39,11 @@ class FloorPlatform(pygame.sprite.Sprite):
 class WallPlatform(FloorPlatform):
     def __init__(self, x, y, group):
         super().__init__(x, y, group)
-        self.color = pygame.Color("yellow")
+        self.width = width
+        self.height = height
         self.can_wall_jump = True
 
-        self.image = pygame.Surface((self.width, self.height))
-        self.image.fill(self.color)
+        self.image = wall
         self.rect = pygame.Rect(x, y, self.width, self.height)
 
 # Двигающаяся платформа

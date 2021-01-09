@@ -369,7 +369,7 @@ def render(level, platforms, platform_sprites, enemies, enemies_sprites):
             if col == "_":
                 pf = FloorPlatform(x, y, platform_sprites)
                 platforms.append(pf)
-            elif col == "|":
+            elif col == "-" or col == "|":
                 pf = WallPlatform(x, y, platform_sprites)
                 platforms.append(pf)
             elif col == ">":
@@ -448,8 +448,8 @@ def game():
         for sprite in platform_sprites:
             camera.apply(sprite)
 
-        for sprite in enemies_sprites:
-            camera.apply(sprite)
+        # for sprite in enemies_sprites:
+        #     camera.apply(sprite)
 
         platform_sprites.update()
         platform_sprites.draw(screen)

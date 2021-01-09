@@ -213,12 +213,14 @@ class MoveState:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LSHIFT and player.last_dir:
                 return DashState(dash_speed, player.state, player)
-            elif event.key == pygame.K_LEFT:
+            if event.key == pygame.K_LEFT:
                 walk_time = get_length(walk_sound)
+                player.go_left = True
                 player.last_dir = "left"
                 self.velocity_x = -hero_speed
-            elif event.key == pygame.K_RIGHT:
+            if event.key == pygame.K_RIGHT:
                 walk_time = get_length(walk_sound)
+                player.go_right = True
                 player.last_dir = "right"
                 self.velocity_x = hero_speed
             elif event.key == pygame.K_SPACE:
@@ -230,6 +232,10 @@ class MoveState:
                 return JumpState(jump_force, player.state)
 
         if event.type == pygame.KEYUP:
+            if event.key == pygame.K_LEFT:
+                player.go_left = False
+            if event.key == pygame.K_RIGHT:
+                player.go_right = False
             if event.key == pygame.K_LEFT and self.velocity_x < 0:
                 player.left = False
                 return IdleState()
