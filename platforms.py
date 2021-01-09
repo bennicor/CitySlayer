@@ -13,11 +13,14 @@ width = config.getint('PLATFORM', 'height')
 height = config.getint('PLATFORM', 'height')
 gravity = config.getfloat('PLATFORM', 'gravity')
 
-floor = [load_image('data/sprite_down/sprite_down_1.png', width, height),
-         load_image('data/sprite_down/sprite_down_2.png', width, height),
-         load_image('data/sprite_down/sprite_down_3.png', width, height),
-         load_image('data/sprite_down/sprite_down_4.png', width, height)]
-wall = load_image('data/sprite_wall/sprite_wall.png', width, height)
+floor = [load_image('data/sprite_down/sprite_down_1_dop.png', width, height),
+         load_image('data/sprite_down/sprite_down_2_dop.png', width, height),
+         load_image('data/sprite_down/sprite_down_3_dop.png', width, height),
+         load_image('data/sprite_down/sprite_down_4_dop.png', width, height)]
+wall = load_image('data/sprite_wall/sprite_wall_dop2.png', width, height)
+Falling_wall = [load_image('data/Falling_Wall/sprite_Falling_wall.png', width, height),
+                load_image('data/Falling_Wall/sprite_Falling_wall2.png', width, height),
+                load_image('data/Falling_Wall/sprite_Falling_wall3.png', width, height)]
 
 
 # Пол
@@ -55,8 +58,7 @@ class MovingPlatform(FloorPlatform):
         self.counter = 0
         self.vel_x = 2 if dir == ">" else -2
 
-        self.image = pygame.Surface((self.width, self.height))
-        self.image.fill(self.color)
+        self.image = load_image('data/MovingPlatform/spriteMovingPlatform.png', self.width, self.height)
         self.rect = pygame.Rect(x, y, self.width, self.height)
 
     # Перемещение платформы на заданном промежутке
@@ -75,8 +77,7 @@ class FallingPlatform(FloorPlatform):
         self.gravity = gravity
         self.falling = False
 
-        self.image = pygame.Surface((self.width, self.height))
-        self.image.fill(pygame.Color("green"))
+        self.image = Falling_wall[randrange(3)]
         self.rect = pygame.Rect(x, y, self.width, self.height)
 
     def update(self):
@@ -91,6 +92,5 @@ class DeadlyPlatform(FloorPlatform):
     def __init__(self, x, y, group):
         super().__init__(x, y, group)
 
-        self.image = pygame.Surface((self.width, self.height))
-        self.image.fill(pygame.Color('gray'))
+        self.image = load_image('data/dead_sprite/sprite_DeadlyPlatform.png', self.width, self.height)
         self.rect = pygame.Rect(x, y, self.width, self.height)

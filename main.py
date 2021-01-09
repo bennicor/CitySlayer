@@ -434,7 +434,8 @@ def game():
         else:
             hero.sounds = True
 
-        screen.fill(pygame.Color("black"))
+        screen.blit(load_image('data/fonts/city.png', 1280, 720), (0, 0))
+        # screen.fill(pygame.Color("#C990BD"))
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
