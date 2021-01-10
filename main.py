@@ -44,6 +44,7 @@ pause_font = pygame.font.Font("data/fonts/pixel_font.ttf", 80)
 font = pygame.font.Font("data/fonts/pixel_font.ttf", 50)
 
 bg = load_image("data/images/bg.jpg", width, height)
+game_bg = load_image("data/images/game_bg.jpg", width, height)
 
 # Загружаем музыку
 load_music("data/sounds/main_theme.mp3")
@@ -369,7 +370,7 @@ def render(level, platforms, platform_sprites, enemies, enemies_sprites):
             if col == "_":
                 pf = FloorPlatform(x, y, platform_sprites)
                 platforms.append(pf)
-            elif col == "-" or col == "|":
+            elif col == "|":
                 pf = WallPlatform(x, y, platform_sprites)
                 platforms.append(pf)
             elif col == ">":
@@ -428,14 +429,14 @@ def game():
 
     while running:
         pygame.mouse.set_visible(False)
+        screen.blit(game_bg, (0, 0))
+
         # Отключаем звуки
         if not sounds:
             hero.sounds = False
         else:
             hero.sounds = True
 
-        screen.blit(load_image('data/fonts/city.png', 1280, 720), (0, 0))
-        # screen.fill(pygame.Color("#C990BD"))
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
@@ -449,8 +450,8 @@ def game():
         for sprite in platform_sprites:
             camera.apply(sprite)
 
-        # for sprite in enemies_sprites:
-        #     camera.apply(sprite)
+        for sprite in enemies_sprites:
+            camera.apply(sprite)
 
         platform_sprites.update()
         platform_sprites.draw(screen)

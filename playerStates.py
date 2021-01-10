@@ -2,7 +2,7 @@ import pygame
 import configparser
 import json
 import time
-from helpers import load_sound, play_sound, get_length, stop_sound
+from helpers import load_sound, play_sound, get_length, stop_sound, load_image
 
 
 config = configparser.ConfigParser()
@@ -16,6 +16,7 @@ wall_jump = json.loads(config.get("PLAYER", "wall_jump"))
 down_timer = config.getfloat("CAMERA", "down_timer")
 width, height = json.loads(config.get("MAIN", "res"))
 h_width, h_height = json.loads(config.get("PLAYER", "size"))
+fps = config.getint("MAIN", "fps")
 
 # Загрузка звуков
 walk_sound = load_sound("data/sounds/walk.wav")
@@ -28,6 +29,32 @@ dash_sound.set_volume(0.3)
 sliding_sound = load_sound("data/sounds/wall_slide.wav")
 sliding_sound.set_volume(0.3)
 slide_time = get_length(sliding_sound)
+
+idle_right = [load_image('data/PassiveReaper_Right/PassiveIdleReaper-Sheet.png', h_width, h_height),
+                 load_image('data/PassiveReaper_Right/PassiveIdleReaper-Sheet2.png', h_width, h_height),
+                 load_image('data/PassiveReaper_Right/PassiveIdleReaper-Sheet3.png', h_width, h_height),
+                 load_image('data/PassiveReaper_Right/PassiveIdleReaper-Sheet4.png', h_width, h_height),
+                 load_image('data/PassiveReaper_Right/PassiveIdleReaper-Sheet5.png', h_width, h_height)]
+
+idle_left = [load_image('data/PassiveReaper_Left/PassiveIdleReaper-Sheet.png', h_width, h_height),
+                 load_image('data/PassiveReaper_Left/PassiveIdleReaper-Sheet2.png', h_width, h_height),
+                 load_image('data/PassiveReaper_Left/PassiveIdleReaper-Sheet3.png', h_width, h_height),
+                 load_image('data/PassiveReaper_Left/PassiveIdleReaper-Sheet4.png', h_width, h_height),
+                 load_image('data/PassiveReaper_Left/PassiveIdleReaper-Sheet5.png', h_width, h_height)]
+
+go_right = [load_image('data/Reaper_go_right/RunningReaper.png', h_width, h_height),
+            load_image('data/Reaper_go_right/RunningReaper2.png', h_width, h_height),
+            load_image('data/Reaper_go_right/RunningReaper3.png', h_width, h_height),
+            load_image('data/Reaper_go_right/RunningReaper4.png', h_width, h_height),
+            load_image('data/Reaper_go_right/RunningReaper6.png', h_width, h_height),
+            load_image('data/Reaper_go_right/RunningReaper7.png', h_width, h_height)]
+
+go_left = [load_image('data/Reaper_go_left/RunningReaper.png', h_width, h_height),
+           load_image('data/Reaper_go_left/RunningReaper2.png', h_width, h_height),
+           load_image('data/Reaper_go_left/RunningReaper3.png', h_width, h_height),
+           load_image('data/Reaper_go_left/RunningReaper4.png', h_width, h_height),
+           load_image('data/Reaper_go_left/RunningReaper6.png', h_width, h_height),
+           load_image('data/Reaper_go_left/RunningReaper7.png', h_width, h_height)]
 
 # Инициализация классов состояния персонажа
 class DashState:
@@ -205,6 +232,7 @@ class MoveState:
         global walk_time
 
         self.velocity_x = velocity_x
+        self.anim_count = 0
         walk_time = get_length(walk_sound)
 
     def handle_event(self, player, event):
@@ -258,6 +286,17 @@ class MoveState:
             else:
                 walk_time += dt
 
+        # Воспроизводим анимацию движения
+        if self.anim_count >= fps:
+            self.anim_count = 0
+
+        if player.last_dir == 'right':
+            player.image = go_right[self.anim_count // 10]
+
+        if player.last_dir == 'left':
+            player.image = go_left[self.anim_count // 10]
+        self.anim_count += 1
+        
         # Если персонаж находится на стене и двигается в ее сторону, он начинает скользить
         if player.onWall and not player.onGround:
             if player.wall_pos == player.last_dir:
@@ -290,6 +329,7 @@ class MoveState:
 class IdleState:
     def __init__(self):
         self.timer = down_timer
+        self.anim_count = 0
 
     def handle_event(self, player, event):
         if event.type == pygame.KEYDOWN:
@@ -310,6 +350,17 @@ class IdleState:
                 return JumpState(jump_force, player.state)
 
     def update(self, player, dt, platforms, camera=None):
+        # Воспроизводим анимацию покоя
+        if self.anim_count >= fps:
+            self.anim_count = 0
+
+        if player.last_dir == 'right':
+            player.image = idle_right[self.anim_count // 15]
+        if player.last_dir == 'left':
+            player.image = idle_left[self.anim_count // 15]
+
+        self.anim_count += 1
+
         # Опускаем камеру при длительном нажатии клавиши
         keys = pygame.key.get_pressed()
 

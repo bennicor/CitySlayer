@@ -17,32 +17,8 @@ gravity = config.getfloat('PLAYER', 'gravity')
 sliding_speed = config.getfloat('PLAYER', 'sliding_speed')
 width, height = json.loads(config.get("PLAYER", "size"))
 
-anim_count = 0
-passive_right = [load_image('data/PassiveReaper_Right/PassiveIdleReaper-Sheet.png', width, height),
-                 load_image('data/PassiveReaper_Right/PassiveIdleReaper-Sheet2.png', width, height),
-                 load_image('data/PassiveReaper_Right/PassiveIdleReaper-Sheet3.png', width, height),
-                 load_image('data/PassiveReaper_Right/PassiveIdleReaper-Sheet4.png', width, height),
-                 load_image('data/PassiveReaper_Right/PassiveIdleReaper-Sheet5.png', width, height)]
+passive_right = load_image('data/PassiveReaper_Right/PassiveIdleReaper-Sheet.png', width, height)
 
-passive_left = [load_image('data/PassiveReaper_Left/PassiveIdleReaper-Sheet.png', width, height),
-                 load_image('data/PassiveReaper_Left/PassiveIdleReaper-Sheet2.png', width, height),
-                 load_image('data/PassiveReaper_Left/PassiveIdleReaper-Sheet3.png', width, height),
-                 load_image('data/PassiveReaper_Left/PassiveIdleReaper-Sheet4.png', width, height),
-                 load_image('data/PassiveReaper_Left/PassiveIdleReaper-Sheet5.png', width, height)]
-
-go_right = [load_image('data/Reaper_go_right/RunningReaper.png', width, height),
-            load_image('data/Reaper_go_right/RunningReaper2.png', width, height),
-            load_image('data/Reaper_go_right/RunningReaper3.png', width, height),
-            load_image('data/Reaper_go_right/RunningReaper4.png', width, height),
-            load_image('data/Reaper_go_right/RunningReaper6.png', width, height),
-            load_image('data/Reaper_go_right/RunningReaper7.png', width, height)]
-
-go_left = [load_image('data/Reaper_go_left/RunningReaper.png', width, height),
-           load_image('data/Reaper_go_left/RunningReaper2.png', width, height),
-           load_image('data/Reaper_go_left/RunningReaper3.png', width, height),
-           load_image('data/Reaper_go_left/RunningReaper4.png', width, height),
-           load_image('data/Reaper_go_left/RunningReaper6.png', width, height),
-           load_image('data/Reaper_go_left/RunningReaper7.png', width, height)]
 
 # Класс персонажа
 class Hero(pygame.sprite.Sprite):
@@ -76,7 +52,7 @@ class Hero(pygame.sprite.Sprite):
         self.timer_cd = .1
 
         # Инициализация dash
-        self.last_dir = ""
+        self.last_dir = "right"
         self.dash_timer = .25
         self.dash_done = False
 
@@ -84,7 +60,7 @@ class Hero(pygame.sprite.Sprite):
 
         self.state = IdleState()
 
-        self.image = passive_right[0]
+        self.image = passive_right
         self.rect = pygame.Rect(self.pos.x, self.pos.y, self.width, self.height)
 
     def dash_cooldown(self, dt):
@@ -187,7 +163,6 @@ class Hero(pygame.sprite.Sprite):
         self.state = new_state if new_state is not None else self.state
 
     def update(self, dt, platforms, camera=None):
-        global anim_count
         if self.onGround:
             self.onWall = False
             self.sliding_timer = .7
@@ -197,21 +172,6 @@ class Hero(pygame.sprite.Sprite):
             self.wall_jump_done = False
             self.touched_wall = False
             self.wall_first_touch = True
-        if anim_count + 1 >= 60:
-            anim_count = 0
-
-        if self.last_dir == 'right':
-            self.image = go_right[anim_count // 10]
-        if self.last_dir == 'left':
-            self.image = go_left[anim_count // 10]
-        if self.go_right == False and self.go_left == False:
-            if self.last_dir == 'right':
-                self.image = passive_right[anim_count // 12]
-            if self.last_dir == 'left':
-                self.image = passive_left[anim_count // 12]
-        anim_count += 1
-
-
 
         self.isSliding = False
         self.state.update(self, dt, platforms, camera)
