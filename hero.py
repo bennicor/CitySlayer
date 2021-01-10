@@ -16,6 +16,7 @@ config.read("settings.ini")
 gravity = config.getfloat('PLAYER', 'gravity')
 sliding_speed = config.getfloat('PLAYER', 'sliding_speed')
 width, height = json.loads(config.get("PLAYER", "size"))
+h_width, h_height = json.loads(config.get("PLAYER", "size"))
 
 passive_right = load_image('data/PassiveReaper_Right/PassiveIdleReaper-Sheet.png', width, height)
 
@@ -127,13 +128,13 @@ class Hero(pygame.sprite.Sprite):
                 
                 if isinstance(hits[0], FallingPlatform):
                     hits[0].falling = True                
+
+                if isinstance(hits[0], EndPlatform):
+                    self.end = True
             elif yvel < 0:
                 self.rect.top = hits[0].rect.bottom
                 self.vel.y = 0
             elif xvel > 0:
-                if isinstance(hits[0], FallingPlatform) and abs(hits[0].rect.top - self.rect.bottom) <= 10:
-                    self.rect.bottom = hits[0].rect.top - 5
-
                 if not self.onGround and hits[0].can_wall_jump:
                     self.onWall = True
                     self.wall_pos = "right"
@@ -144,9 +145,6 @@ class Hero(pygame.sprite.Sprite):
 
                 self.rect.right = hits[0].rect.left
             elif xvel < 0:
-                if isinstance(hits[0], FallingPlatform) and abs(hits[0].rect.top - self.rect.bottom) <= 5:
-                    self.rect.bottom = hits[0].rect.top - 5
-
                 if not self.onGround and hits[0].can_wall_jump:
                     self.onWall = True
                     self.wall_pos = "left"

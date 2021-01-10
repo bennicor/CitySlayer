@@ -292,6 +292,7 @@ def end_screen():
 
     button_end = Button(screen, 500, height * 0.8, 280, 65, "Exit", font)
 
+    stop_sound()
     running = True
     click = False
 
@@ -337,7 +338,7 @@ def death_screen():
 
     while running:
         pygame.display.flip()
-        time.sleep(2)
+        time.sleep(1)
         running = False
 
 def respawn():
@@ -394,7 +395,13 @@ def render(level, platforms, platform_sprites, enemies, enemies_sprites):
             elif col == "^":
                 pf = DeadlyPlatform(x, y, platform_sprites)
                 platforms.append(pf)
-    
+            elif col == "W":
+                pf = EndPlatform(x, y, platform_sprites)
+                platforms.append(pf)
+            elif col == "+":
+                pf = Platform(x, y, platform_sprites)
+                platforms.append(pf)
+
             x += pf.width
         y += pf.height
         x = 0
@@ -453,7 +460,7 @@ def game():
         for sprite in enemies_sprites:
             camera.apply(sprite)
 
-        platform_sprites.update()
+        platform_sprites.update(dt)
         platform_sprites.draw(screen)
 
         enemies_sprites.update(dt, platforms, hero_sprites, hero)

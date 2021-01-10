@@ -20,14 +20,14 @@ fps = config.getint("MAIN", "fps")
 
 # Загрузка звуков
 walk_sound = load_sound("data/sounds/walk.wav")
-walk_sound.set_volume(0.3)
+walk_sound.set_volume(0.5)
 walk_time = get_length(walk_sound)
 jump_sound = load_sound("data/sounds/jump.wav")
-jump_sound.set_volume(0.3)
+jump_sound.set_volume(0.4)
 dash_sound = load_sound("data/sounds/dash.wav")
-dash_sound.set_volume(0.3)
+dash_sound.set_volume(0.4)
 sliding_sound = load_sound("data/sounds/wall_slide.wav")
-sliding_sound.set_volume(0.3)
+sliding_sound.set_volume(0.4)
 slide_time = get_length(sliding_sound)
 
 idle_right = [load_image('data/PassiveReaper_Right/PassiveIdleReaper-Sheet.png', h_width, h_height),
@@ -330,6 +330,7 @@ class IdleState:
     def __init__(self):
         self.timer = down_timer
         self.anim_count = 0
+        self.camera_down = False
 
     def handle_event(self, player, event):
         if event.type == pygame.KEYDOWN:
@@ -367,10 +368,12 @@ class IdleState:
         if keys[pygame.K_DOWN]:
             self.timer -= dt
 
-            if self.timer <= 0:
-                camera.y_offset //=2
+            if self.timer <= 0 and not self.camera_down:
+                camera.y_offset *= 0.4
+                self.camera_down = True
         else:
             self.timer = down_timer
+            self.camera_down = False
             camera.y_offset = height // 2 + h_height
 
         if player.onGround:
