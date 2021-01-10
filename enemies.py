@@ -3,6 +3,7 @@ import configparser
 import json
 from random import choice
 from platforms import DeadlyPlatform
+from helpers import load_image
 
 
 config = configparser.ConfigParser()
@@ -17,6 +18,7 @@ vel_y = config.getint("ENEMY", "vel_y")
 jump_cd = config.getfloat("ENEMY", "jump_cd")
 gravity = config.getfloat("PLAYER", "gravity")
 
+enemy = load_image('data/enemies/enemy.png', 10, 10)
 
 class BaseEnemy(pygame.sprite.Sprite):
     def __init__(self, x, y, group):
@@ -33,8 +35,6 @@ class BaseEnemy(pygame.sprite.Sprite):
 
         self.gravity = gravity
 
-        self.image = pygame.Surface((self.width, self.height))
-        self.image.fill(self.color)
         self.rect = pygame.Rect(x, y, self.width, self.height)
 
     def death(self):
@@ -77,11 +77,15 @@ class BaseEnemy(pygame.sprite.Sprite):
 
 
 class SlowWalkEnemy(BaseEnemy):
+    enemy = load_image('data/enemies/enemy.png', width, height)
+
     def __init__(self, x, y, group):
         super().__init__(x, y, group)
         self.speed = choice([-slow, slow])
         self.range = range
         self.counter =  0
+
+        self.image = SlowWalkEnemy.enemy
 
     def update(self, dt, platforms, hero_group, hero):
         self.gravitation()
@@ -96,18 +100,19 @@ class SlowWalkEnemy(BaseEnemy):
 
 
 class FastWalkEnemy(BaseEnemy):
+    enemy = load_image('data/enemies/enemy.png', width, int(height * 1.2))
+
     def __init__(self, x, y, group):
         super().__init__(x, y, group)
         self.color = pygame.Color("yellow")
-        self.width = width * 0.7
+        self.width = width
         self.height = height * 1.2
 
         self.speed = choice([-fast, fast])
         self.range = range
         self.counter =  0
 
-        self.image = pygame.Surface((self.width, self.height))
-        self.image.fill(self.color)
+        self.image = FastWalkEnemy.enemy
         self.rect = pygame.Rect(x, y, self.width, self.height)
 
     def update(self, dt, platforms, hero_group, hero):
@@ -123,6 +128,8 @@ class FastWalkEnemy(BaseEnemy):
 
 
 class JumpEnemy(BaseEnemy):
+    enemy = load_image('data/enemies/enemy.png', int(width * 1.5), height)
+
     def __init__(self, x, y, group):
         super().__init__(x, y, group)
         self.color = pygame.Color("purple")
@@ -133,8 +140,7 @@ class JumpEnemy(BaseEnemy):
         self.jump_cd = jump_cd
         self.speed = choice([-fast, fast])
 
-        self.image = pygame.Surface((self.width, self.height))
-        self.image.fill(self.color)
+        self.image = JumpEnemy.enemy
         self.rect = pygame.Rect(x, y, self.width, self.height)
 
     def update(self, dt, platforms, hero_group, hero):
