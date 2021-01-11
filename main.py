@@ -42,6 +42,7 @@ else:
 title_font = pygame.font.Font("data/fonts/pixel_font.ttf", 120)
 pause_font = pygame.font.Font("data/fonts/pixel_font.ttf", 80)
 font = pygame.font.Font("data/fonts/pixel_font.ttf", 50)
+tiny_font = pygame.font.Font("data/fonts/pixel_font.ttf", 25)
 
 bg = load_image("data/images/bg.jpg", width, height)
 game_bg = load_image("data/images/game_bg.jpg", width, height)
@@ -86,6 +87,7 @@ def main_menu():
 
         # Отрисовка текста
         render_text("City Slayer", title_font, pygame.Color("#c2c1bf"), screen, width // 2, height // 4)
+        render_text("v. 1.0", tiny_font, pygame.Color("#c2c1bf"), screen, width * 0.93, height * 0.95, align="left")
 
         # Координаты курсора
         x, y = pygame.mouse.get_pos()
@@ -356,6 +358,7 @@ def restart():
     death_screen()
     saves = True
     hero.state = IdleState()
+    hero.next_state = IdleState()
     hero.dead = False
     respawn()
 
